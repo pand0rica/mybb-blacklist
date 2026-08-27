@@ -1,0 +1,142 @@
+/* Blacklist Plugin – structural layout only, all colors inherited from MyBB theme */
+
+/* ── Inline SVG icons ──────────────────────────────────────────────────────── */
+.blacklist-icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.15em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: inline-block;
+    flex-shrink: 0;
+    pointer-events: none;
+}
+
+/* Smaller icons in action buttons */
+.blacklist-entry-actions .blacklist-icon {
+    width: 0.9em;
+    height: 0.9em;
+    /*width:12px;height:12px;vertical-align:-2px*/
+}
+
+/* ── Navigation ────────────────────────────────────────────────────────────── */
+.blacklist-nav-active { font-weight: bold; }
+.blacklist-nav-sep    { opacity: 0.4; margin: 0 0.35em; }
+
+/* ── Deadline header info ──────────────────────────────────────────────────── */
+.blacklist-deadline-info {
+    margin: 0 0 10px;
+    padding: 0;
+}
+.blacklist-deadline-info.blacklist-overdue strong {
+    color: #c00;
+}
+
+/* ── Intro text ────────────────────────────────────────────────────────────── */
+.blacklist-intro {
+    margin: 0 0 12px;
+    padding: 10px 14px;
+    line-height: 1.5;
+}
+.blacklist-intro p:first-child { margin-top: 0; }
+.blacklist-intro p:last-child  { margin-bottom: 0; }
+
+/* ── Entry table ───────────────────────────────────────────────────────────── */
+.blacklist-entry-user    { white-space: nowrap; }
+.blacklist-entry-actions { white-space: nowrap; }
+.blacklist-entry-actions form { display: inline; margin: 0; }
+
+/* Overdue row: subtle highlight */
+.blacklist-overdue .blacklist-entry-user { color: #c00; }
+
+/* Resolved row: muted, user has responded */
+.blacklist-resolved { opacity: 0.55; }
+.blacklist-status-resolved { white-space: nowrap; }
+
+/* Deleted account: keep listed but visually marked, no profile link */
+.blacklist-deleted-user { text-decoration: line-through; opacity: 0.8; }
+.blacklist-deleted-note  { font-style: italic; opacity: 0.7; }
+
+/* ── Icon-only action buttons ──────────────────────────────────────────────── */
+.blacklist-icon-btn {
+    padding: 3px 6px;
+    cursor: pointer;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+    background: transparent;
+    line-height: 1;
+    margin-left: 3px;
+}
+.blacklist-icon-btn:hover { border-color: #666; }
+
+/* ── Add form ──────────────────────────────────────────────────────────────── */
+.blacklist-add-bar {
+    padding: 8px 10px;
+    margin-bottom: 12px;
+}
+.blacklist-add-form {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin: 0;
+}
+.blacklist-add-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 0.85em;
+}
+.blacklist-add-form input[type="number"],
+.blacklist-add-form select {
+    padding: 4px 6px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 0.85em;
+}
+
+/* ── Activity simulation ───────────────────────────────────────────────────── */
+.blacklist-activity-hint      { font-style: italic; }
+.blacklist-activity-condition { font-style: italic; font-size: 0.87em; opacity: 0.8; margin: 2px 0 0; }
+.blacklist-activity-username  { font-weight: bold; white-space: nowrap; }
+.blacklist-activity-detail    { font-size: 0.9em; }
+
+/* ── Scene list inside activity detail ─────────────────────────────────────── */
+.blacklist-scene-list      { margin: 3px 0 0 0; padding-left: 1.2em; }
+.blacklist-scene-list-item { margin: 0 0 2px; }
+.blacklist-scene-meta      { opacity: 0.7; font-size: 0.9em; }
+.blacklist-detail-label    { opacity: 0.75; }
+
+/* ── Run management ────────────────────────────────────────────────────────── */
+.blacklist-run-notice {
+    margin-bottom: 12px;
+}
+.blacklist-run-actions {
+    text-align: right;
+    margin-bottom: 12px;
+}
+.blacklist-tcat-danger {
+    border-left: 4px solid #c44;
+}
+
+/* ── Table layout improvements ─────────────────────────────────────────────── */
+.blacklist-table {
+    width: 100%;
+    border-spacing: 0;
+}
+.blacklist-table th,
+.blacklist-table td {
+    padding: 8px 12px;
+    text-align: left;
+}
+.blacklist-table .tcat {
+    font-weight: bold;
+    padding: 10px 12px;
+}
+.blacklist-table .trow1,
+.blacklist-table .trow2 {
+    vertical-align: middle;
+}
