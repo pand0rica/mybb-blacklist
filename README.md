@@ -1,6 +1,6 @@
 # Blacklist
 
-**Version 1.6.1**
+**Version 1.6.2**
 
 A scene-based activity blacklist plugin for MyBB 1.8 RPG forums with Logbook integration.
 
@@ -11,9 +11,9 @@ The plugin automatically checks whether characters (users) are posting in their 
 ## Requirements
 
 - MyBB 1.8.x
-- PHP 7.4 or higher
+- PHP 7.4 or 8.x
 - **Logbook plugin** (required for scene-based categories — install and activate it first)
-- **EnhancedAccountSwitcher plugin** (optional — required for the index notice bar feature)
+- **EnhancedAccountSwitcher plugin** (optional — required for the `No sub-account` category and for aggregating characters in the index notice bar)
 
 ---
 
@@ -21,9 +21,16 @@ The plugin automatically checks whether characters (users) are posting in their 
 
 1. Upload all files to your MyBB root directory, keeping the folder structure intact.
 2. Go to **ACP → Configuration → Plugins**.
-3. Find **Blacklist** and click **Activate**.
+3. Find **Blacklist** and click **Install & Activate**.
 4. Go to **ACP → Tools → Blacklist** to create categories.
 5. Go to **ACP → Configuration → Settings → Blacklist** to configure deadlines, task schedule and notifications.
+
+### Updating from an older version
+
+1. Upload the new files (overwrite existing ones).
+2. **ACP → Configuration → Plugins → Blacklist → Deactivate**, then **Activate** again.
+
+Reactivating reloads all templates and the stylesheet and runs the database migrations. Your settings, categories and entries are kept — only *Uninstall* removes them.
 
 ---
 
@@ -109,7 +116,9 @@ Only one run can be active at a time. Closing a run does not delete entries — 
 
 ### Index notice bar
 
-If EnhancedAccountSwitcher is installed, main accounts (the account with `as_uid = 0`) automatically see a notice banner on the forum index when any of their characters have an open blacklist entry. The banner lists affected characters, deadlines and the required action.
+Logged-in users see a notice banner on the forum index when they have an open entry in the active run. If EnhancedAccountSwitcher is installed, a main account (`as_uid = 0`) sees one aggregated banner for itself and all linked characters. The banner lists affected characters, deadlines and the required action.
+
+The banner is inserted as `{$blacklist_index_notice}` directly after `{$header}` in the `index` template of every template set on activation, and removed again on deactivation.
 
 ![Index notice bar](docs/screenshots/blacklist-index-notice.png)
 
@@ -121,19 +130,19 @@ Users and visitors can see the current blacklist at:
 https://yourforum.com/blacklist.php
 ```
 
-Entries are grouped by category. Scene/thread columns are only shown for categories that need them. If a user has a self-removal option, the appropriate button appears next to their entry.
+Entries are grouped by category. The scene column is only shown for `Scene wait` categories. If a user has a self-removal option (response type *Button* or *Post in scene*), an **I'm active!** button appears next to their own entry. For *Post in scene*, the entry is also resolved automatically as soon as the user posts in that thread.
 
 ![Public blacklist (user view)](docs/screenshots/blacklist-user.png)
 
 ### Activity simulation
 
-Any logged-in user can check which entries would be generated for them right now — without anything being saved:
+The activity simulation shows, per active category, which accounts would get an entry if the blacklist were generated right now — nothing is saved:
 
 ```
 https://yourforum.com/blacklist.php?action=activity
 ```
 
-Team members can check any user by appending `&uid=X`.
+For `Scene wait` categories, every affected scene is listed with its last post date and the days of inactivity.
 
 ![Activity simulation](docs/screenshots/blacklist-activity.png)
 
@@ -151,6 +160,16 @@ Users in the configured moderator groups (or admins) see additional controls on 
 
 Go to **ACP → Tools → Blacklist → Open Entries** for a full management overview.
 
+### Scene-wait debug trace (team)
+
+If a `Scene wait` entry is unexpectedly missing or present, team members can open
+
+```
+https://yourforum.com/blacklist.php?action=activity&debug=1
+```
+
+The trace lists every user/scene combination that was evaluated, including turn order, participant count, days waiting and the reason a scene was skipped (solo scene, not their turn, free-order scene).
+
 ### Automatic task
 
 The blacklist is generated automatically by MyBB's task system. Configure the schedule in **ACP → Configuration → Settings → Blacklist** (enable, day, hour, minute). Changes take effect immediately after saving — no plugin reactivation needed.
@@ -167,12 +186,21 @@ Set a Thread ID and Poster UID in the settings. When a new blacklist run is star
 
 ---
 
+## Tips & Tricks
+
+- **Settings are safe on reactivation.** Deactivating/activating (e.g. after an update) never resets your settings, categories or entries.
+- **Task schedule changes apply immediately.** The task row is synchronised with the settings on every ACP page load; check **ACP → Tools → Blacklist → Task Status** if in doubt.
+- **Deleted accounts stay visible.** If a listed account is deleted, the entry stays with a struck-through name and an "(account deleted)" note.
+- **Finished scenes resolve automatically.** When a scene is marked finished in Logbook, open entries for that scene are resolved.
+
+---
+
 ## Uninstallation
 
 1. Go to **ACP → Configuration → Plugins** → **Deactivate** Blacklist.
 2. Click **Uninstall**.
 
-This removes all database tables (`blacklist_categories`, `blacklist_entries`, `blacklist_runs`), all settings, templates, the scheduled task and the stylesheet from all themes. The Logbook plugin is not affected.
+Deactivating removes the templates, the stylesheet from all themes and the index notice placeholder, and disables the task. Uninstalling additionally removes all database tables (`blacklist_categories`, `blacklist_entries`, `blacklist_runs`), all settings and the scheduled task. The Logbook plugin is not affected.
 
 ---
 

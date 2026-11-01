@@ -451,8 +451,6 @@ class Blacklist_Engine
      */
     private function checkButtonRequirement(array $entry, array $category): bool
     {
-        global $db;
-
         $uid  = (int) $entry['uid'];
         $now  = TIME_NOW;
         $ts   = (int) $entry['timestamp_added'];

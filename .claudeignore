@@ -7,6 +7,7 @@
 
 # SQL dumps
 *.sql
+*.dump
 
 # Internal docs (not for the public repo)
 TESTING.md
@@ -22,3 +23,6 @@ Thumbs.db
 *.log
 *.stackdump
 bug.PNG
+
+# Binary screenshots (noise for AI context)
+docs/screenshots/*.png

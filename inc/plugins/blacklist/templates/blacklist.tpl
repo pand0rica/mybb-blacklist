@@ -7,7 +7,6 @@
 {$header}
 <table width="100%" border="0" align="center">
 <tr>
-{$usercpnav}
 <td valign="top">
 
 <table border="0" cellspacing="1" cellpadding="6" class="tborder" style="margin-bottom:12px">
