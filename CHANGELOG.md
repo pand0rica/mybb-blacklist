@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.6.3
+
+### Changed
+- German texts are now gender-inclusive (dev kit `conventions.md` §10): "Nutzer"/"Benutzer" → "Accounts"/"Betroffene", "Teilnehmer" → "Teilnehmende" in the frontend and admin language files (`blacklist_lbl_uid`, `blacklist_col_user`, `blacklist_desc_*`, `blacklist_type_no_active_scene`, `blacklist_condition_no_active_scene`, debug column labels). No template changes – no reactivation needed.
+- `AGENTS.md` / `PROJECT_CONTEXT.md` updated to the same rule.
+
+---
+
 ## 1.6.2
 
 **Upgrade:** after uploading the files, deactivate and reactivate the plugin once – this reloads the templates (several were added) and the stylesheet. Settings and data are kept.

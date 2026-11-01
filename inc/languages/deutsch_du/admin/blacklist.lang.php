@@ -29,10 +29,10 @@ $l['blacklist_lbl_frozen_profile_field'] = 'Profilfeld (Auf-Eis-bis-Datum)';
 $l['blacklist_desc_name']               = 'Angezeigter Name dieser Kategorie.';
 $l['blacklist_desc_type']               = 'Was diese Kategorie auslöst.';
 $l['blacklist_desc_threshold']          = 'Anzahl Tage Inaktivität, bevor ein Eintrag erstellt wird.';
-$l['blacklist_desc_response']           = 'Wie Nutzer sich selbst aus dieser Kategorie entfernen können.';
-$l['blacklist_desc_groups']             = 'Nur Nutzer in diesen Gruppen werden geprüft. Leer = alle Nutzer.';
-$l['blacklist_desc_include_additional'] = 'Auch Nutzer prüfen, deren Zusatzgruppen die gewählten Gruppen enthalten.';
-$l['blacklist_desc_away_exempt']        = 'Wenn aktiviert, werden Nutzer mit gesetztem Abwesend-Status nicht in diese Kategorie eingetragen.';
+$l['blacklist_desc_response']           = 'Wie sich Betroffene selbst aus dieser Kategorie entfernen können.';
+$l['blacklist_desc_groups']             = 'Nur Accounts in diesen Gruppen werden geprüft. Leer = alle Accounts.';
+$l['blacklist_desc_include_additional'] = 'Auch Accounts prüfen, deren Zusatzgruppen die gewählten Gruppen enthalten.';
+$l['blacklist_desc_away_exempt']        = 'Wenn aktiviert, werden Accounts mit gesetztem Abwesend-Status nicht in diese Kategorie eingetragen.';
 $l['blacklist_desc_sort_order']         = 'Kleinere Zahlen erscheinen zuerst.';
 $l['blacklist_desc_frozen_profile_field'] = 'Profilfeld auswählen, das das „Auf Eis bis"-Datum enthält (muss per strtotime lesbar sein, z. B. JJJJ-MM-TT).';
 
@@ -43,7 +43,7 @@ $l['blacklist_type_login']         = 'Login (inaktiv seit letztem Login)';
 $l['blacklist_type_posting']       = 'Posting (keine globale Posting-Aktivität)';
 $l['blacklist_type_group']         = 'Gruppenzugehörigkeit';
 $l['blacklist_type_no_subaccount'] = 'Kein Unteraccount (seit X+ Tagen registriert, kein verknüpfter Unteraccount)';
-$l['blacklist_type_no_active_scene'] = 'Keine aktuelle Szene (keine legitime aktive Szene mit mind. 2 Teilnehmern)';
+$l['blacklist_type_no_active_scene'] = 'Keine aktuelle Szene (keine legitime aktive Szene mit mind. 2 Teilnehmenden)';
 $l['blacklist_type_frozen']        = 'Auf Eis (Profilfeld-Datum abgelaufen – noch in der Gruppe „Auf Eis")';
 
 // Rückmeldungstypen
@@ -60,7 +60,7 @@ $l['blacklist_col_days']     = 'Tage';
 $l['blacklist_col_resp']     = 'Rückmeldung';
 $l['blacklist_col_active']   = 'Aktiv';
 $l['blacklist_col_actions']  = 'Aktionen';
-$l['blacklist_col_user']     = 'Benutzer';
+$l['blacklist_col_user']     = 'Account';
 $l['blacklist_col_category'] = 'Kategorie';
 $l['blacklist_col_scene']    = 'Thread/Szene';
 $l['blacklist_col_added']    = 'Hinzugefügt';

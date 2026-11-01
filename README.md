@@ -1,6 +1,6 @@
 # Blacklist
 
-**Version 1.6.2**
+**Version 1.6.3**
 
 A scene-based activity blacklist plugin for MyBB 1.8 RPG forums with Logbook integration.
 

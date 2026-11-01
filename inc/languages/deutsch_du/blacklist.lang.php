@@ -17,7 +17,7 @@ $l['blacklist_btn_delete']    = 'Löschen';
 $l['blacklist_btn_add']       = 'Eintrag hinzufügen';
 
 // Team form labels
-$l['blacklist_lbl_uid']      = 'Benutzer-ID:';
+$l['blacklist_lbl_uid']      = 'Account-ID:';
 $l['blacklist_lbl_category'] = 'Kategorie:';
 $l['blacklist_lbl_thread']   = 'Thread-ID (0 = keine):';
 
@@ -42,7 +42,7 @@ $l['blacklist_condition_registration']  = 'Account vor %d+ Tagen registriert, se
 $l['blacklist_condition_posting']       = 'Kein Post weltweit seit %d Tagen';
 $l['blacklist_condition_group']         = 'Mitglied in bestimmter Gruppe';
 $l['blacklist_condition_no_subaccount'] = 'Seit %d+ Tagen registriert, kein Unteraccount verknüpft';
-$l['blacklist_condition_no_active_scene'] = 'Keine legitime aktive Szene (mind. 2 Teilnehmer)';
+$l['blacklist_condition_no_active_scene'] = 'Keine legitime aktive Szene (mind. 2 Teilnehmende)';
 $l['blacklist_condition_frozen']        = '"Eingefroren bis"-Datum seit %d+ Tagen überschritten';
 
 // Activity simulation – date/detail labels
@@ -98,8 +98,8 @@ $l['blacklist_debug_legend_not_next']    = 'Nicht dran';
 $l['blacklist_debug_legend_hit']         = 'Bedingung erfüllt';
 $l['blacklist_debug_legend_ok']          = 'OK';
 $l['blacklist_debug_col_category']       = 'Kategorie';
-$l['blacklist_debug_col_user']           = 'Nutzer (uid)';
-$l['blacklist_debug_col_participants']   = 'Teilnehmer';
+$l['blacklist_debug_col_user']           = 'Account (uid)';
+$l['blacklist_debug_col_participants']   = 'Teilnehmende';
 $l['blacklist_debug_col_last_post']      = 'Letzter Post';
 $l['blacklist_debug_col_days']           = 'Tage';
 $l['blacklist_debug_col_threshold']      = 'Schwelle';

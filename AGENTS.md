@@ -13,13 +13,15 @@ Das Dev-Kit wird **nicht** in dieses Repo kopiert; es wird per absolutem Pfad re
 
 ## Sprache
 Antworten Deutsch, Code/Bezeichner Englisch. PHP 7.4 + 8.x. Keine externen Libraries.
+Alle Texte (Begleitdateien, Sprachdateien, Templates, Settings) geschlechtergerecht:
+genderneutral, sonst Gender-Sternchen; Englisch neutral (Kit `standards/conventions.md` §10).
 
-## Phasen (der Nutzer löst sie einzeln aus)
+## Phasen (werden einzeln ausgelöst)
 
 Das Plugin ist bereits umgesetzt (kein `IMPLEMENTATION_PLAN.md` mehr nötig). Neue Features
 werden über Phase 1 (Rework/Erweiterung) geplant.
 
-| Nutzer sagt | Phase | Folge dieser Kit-Datei |
+| Eingabe | Phase | Folge dieser Kit-Datei |
 |---|---|---|
 | „erweitere / überarbeite …" | Plan | `D:\mybb-plugin-dev-kit\prompts\rework.md` → `workflows\1-plan.md` |
 | „umsetzen / implementieren" | Umsetzung | `D:\mybb-plugin-dev-kit\workflows\2-implement.md` |

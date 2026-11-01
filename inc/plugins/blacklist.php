@@ -4,7 +4,7 @@
  * Plugin URI:  https://github.com/pand0rica/mybb-blacklist
  * Description: Scene-based activity blacklist with Logbook integration for RPG forums.
  * Author:      pand0rica
- * Version:     1.6.2
+ * Version:     1.6.3
  * MyBB:        1.8.x
  */
 
@@ -40,7 +40,7 @@ function blacklist_info(): array
         'website'       => 'https://github.com/pand0rica/mybb-blacklist',
         'author'        => 'pand0rica',
         'authorsite'    => 'https://github.com/pand0rica',
-        'version'       => '1.6.2',
+        'version'       => '1.6.3',
         'guid'          => '',
         'compatibility' => '18*',
     ];

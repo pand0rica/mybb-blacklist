@@ -3,15 +3,15 @@
 ## Identität
 - **Name:** Blacklist
 - **Codename / Dateiname:** `blacklist` (Präfix: `blacklist_`, Klassen `Blacklist_*`)
-- **Version:** 1.6.2
-- **Autor:** pand0rica
+- **Version:** 1.6.3
+- **Entwickelt von:** pand0rica
 - **Kurzbeschreibung:** Szenenbasierte Aktivitäts-Blacklist für MyBB-RPG-Foren mit Logbook-Integration.
 - **MyBB:** 1.8.x · **PHP:** 7.4 + 8.x
 
 ## Zweck & Zielgruppe
-Prüft für RPG-Foren, ob Charaktere (User) in ihren aktiven Szenen posten, und erzeugt
+Prüft für RPG-Foren, ob Charaktere (Accounts) in ihren aktiven Szenen posten, und erzeugt
 Blacklist-Einträge – szenenbasiert über das Logbook-Plugin, nicht nur über globale
-Aktivität. Blacklists laufen in **Runden** (runs): Team startet eine Runde, User melden sich
+Aktivität. Blacklists laufen in **Runden** (runs): Team startet eine Runde, die Betroffenen melden sich
 zurück, Team schließt die Runde ab.
 
 ## Architektur
@@ -49,8 +49,8 @@ Schema-Ergänzungen älterer Versionen laufen idempotent in `blacklist_migrate_d
 - `registration` – inaktiv seit Registrierung.
 - `login` – inaktiv seit lastactive/lastvisit.
 - `posting` – kein globaler Post seit X Tagen.
-- `group` – Gruppenmitgliedschaft (flaggt alle passenden User).
-- `no_active_scene` – keine legitime aktive Szene (≥ 2 aktive Teilnehmer mit existierendem
+- `group` – Gruppenmitgliedschaft (flaggt alle passenden Accounts).
+- `no_active_scene` – keine legitime aktive Szene (≥ 2 aktive Teilnehmende mit existierendem
   Account), ohne Zeitschwelle.
 - `no_subaccount` – seit X+ Tagen registriert, aber kein verknüpfter Zweitaccount
   (`users.as_uid`, EnhancedAccountSwitcher). Wird komplett übersprungen, wenn die Spalte fehlt.
@@ -58,8 +58,8 @@ Schema-Ergänzungen älterer Versionen laufen idempotent in `blacklist_migrate_d
 
 ## Response-Typen
 - `none` – nur das Team kann auflösen.
-- `button` – User klickt „Ich bin aktiv", Bedingung wird neu geprüft.
-- `posting` – User muss im exakten Thread **nach** `timestamp_added` posten. Einträge ohne
+- `button` – Betroffene klicken „Ich bleibe aktiv!", die Bedingung wird neu geprüft.
+- `posting` – Betroffene müssen im exakten Thread **nach** `timestamp_added` posten. Einträge ohne
   `thread_id` (Nicht-Szenen-Kategorien) akzeptieren jeden sichtbaren Post nach
   `timestamp_added`.
 
