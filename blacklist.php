@@ -4,9 +4,15 @@
  *
  * blacklist.php              – current open blacklist (grouped by category)
  * blacklist.php?action=activity  – live simulation (no DB write)
- * blacklist.php?action=resolve&entry_id=X&my_post_key=... – self-removal
- * blacklist.php?action=add&uid=X (team only)
- * blacklist.php?action=delete&entry_id=X (team only)
+ * blacklist.php?action=activity&debug=1 – scene_wait trace (team only)
+ *
+ * POST actions (all require my_post_key):
+ *   resolve       – self-removal of the user's own entry
+ *   add           – manual entry (team only)
+ *   delete        – delete entry (team only)
+ *   team_resolve  – resolve entry manually (team only)
+ *   close_run     – mark the active run as done (team only)
+ *   new_run       – start a new run (team only)
  */
 
 define('IN_MYBB', 1);
@@ -23,12 +29,26 @@ add_breadcrumb($lang->blacklist_title, "blacklist.php");
 $engine = new Blacklist_Engine();
 $action = $mybb->get_input('action');
 
+// Write actions are POST only; team actions additionally need team rights.
+$blacklist_write_actions = ['resolve', 'add', 'delete', 'team_resolve', 'close_run', 'new_run'];
+$blacklist_team_actions  = ['add', 'delete', 'team_resolve', 'close_run', 'new_run'];
+
+if (in_array($action, $blacklist_write_actions, true)) {
+    if ($mybb->request_method !== 'post') {
+        error_no_permission();
+    }
+    verify_post_check($mybb->get_input('my_post_key'));
+
+    if (in_array($action, $blacklist_team_actions, true) && !blacklist_is_team()) {
+        error_no_permission();
+    }
+}
+
 // ------------------------------------------------------------------
 // Self-removal: resolve own entry
 // ------------------------------------------------------------------
 
 if ($action === 'resolve') {
-    verify_post_check($mybb->get_input('my_post_key'));
 
     if (!$mybb->user['uid']) {
         error_no_permission();
@@ -53,8 +73,7 @@ if ($action === 'resolve') {
 // Team: add manual entry
 // ------------------------------------------------------------------
 
-if ($action === 'add' && blacklist_is_team()) {
-    verify_post_check($mybb->get_input('my_post_key'));
+if ($action === 'add') {
 
     $uid         = (int) $mybb->get_input('uid', MyBB::INPUT_INT);
     $category_id = (int) $mybb->get_input('category_id', MyBB::INPUT_INT);
@@ -77,8 +96,7 @@ if ($action === 'add' && blacklist_is_team()) {
 // Team: delete entry
 // ------------------------------------------------------------------
 
-if ($action === 'delete' && blacklist_is_team()) {
-    verify_post_check($mybb->get_input('my_post_key'));
+if ($action === 'delete') {
 
     $entry_id = (int) $mybb->get_input('entry_id', MyBB::INPUT_INT);
 
@@ -94,8 +112,7 @@ if ($action === 'delete' && blacklist_is_team()) {
 // Team: manually resolve an entry
 // ------------------------------------------------------------------
 
-if ($action === 'team_resolve' && blacklist_is_team()) {
-    verify_post_check($mybb->get_input('my_post_key'));
+if ($action === 'team_resolve') {
 
     $entry_id = (int) $mybb->get_input('entry_id', MyBB::INPUT_INT);
 
@@ -111,8 +128,7 @@ if ($action === 'team_resolve' && blacklist_is_team()) {
 // Team: close current run (mark as done)
 // ------------------------------------------------------------------
 
-if ($action === 'close_run' && blacklist_is_team()) {
-    verify_post_check($mybb->get_input('my_post_key'));
+if ($action === 'close_run') {
 
     $run = $engine->getActiveRun();
 
@@ -128,8 +144,7 @@ if ($action === 'close_run' && blacklist_is_team()) {
 // Team: start a new run
 // ------------------------------------------------------------------
 
-if ($action === 'new_run' && blacklist_is_team()) {
-    verify_post_check($mybb->get_input('my_post_key'));
+if ($action === 'new_run') {
 
     if (!$engine->getActiveRun()) {
         $engine->createRun();
@@ -143,67 +158,47 @@ if ($action === 'new_run' && blacklist_is_team()) {
 // Debug: scene_wait trace  (action=activity&debug=1, team only)
 // ------------------------------------------------------------------
 
-if ($action === 'activity' && $mybb->get_input('debug') && blacklist_is_team()) {
-    $trace = $engine->debugSceneWait();
+if ($action === 'activity' && $mybb->get_input('debug', MyBB::INPUT_INT) && blacklist_is_team()) {
+    $trace      = $engine->debugSceneWait();
+    $debug_rows = '';
 
-    echo '<!DOCTYPE html><html><head><meta charset="utf-8">'
-       . '<title>Blacklist Debug: scene_wait</title>'
-       . '<style>body{font-family:sans-serif;font-size:12px;padding:20px}'
-       . 'table{border-collapse:collapse;width:100%}'
-       . 'th,td{border:1px solid #ccc;padding:4px 6px;text-align:left}'
-       . 'th{background:#ddd}.skip{color:#c00}.hit{color:#a60;font-weight:bold}'
-       . 'tr.solo{background:#fee} tr.not-next{background:#ffd} tr.hit{background:#ffc} tr.ok{background:#efe}'
-       . '</style></head><body>';
-    echo '<h2>Blacklist Debug – scene_wait</h2>';
-    echo '<p><a href="blacklist.php?action=activity">&larr; Zurück</a></p>';
-    echo '<p>Legende: <span style="background:#fee;padding:2px 6px">Solo-Szene</span> '
-       . '<span style="background:#ffd;padding:2px 6px">Nicht dran</span> '
-       . '<span style="background:#ffc;padding:2px 6px">Bedingung erfüllt</span> '
-       . '<span style="background:#efe;padding:2px 6px">OK</span></p>';
+    foreach ($trace as $t) {
+        $skip_reason = (string) ($t['skip_reason'] ?? '');
 
-    if (empty($trace)) {
-        echo '<p>Keine scene_wait-Kategorien aktiv oder Logbook nicht installiert.</p>';
-    } else {
-        echo '<table><tr><th>Kategorie</th><th>Nutzer (uid)</th><th>scene_id</th>'
-           . '<th>tid</th><th>free_order</th><th>Teilnehmer</th><th>next_poster_uid</th>'
-           . '<th>last_post</th><th>Tage</th><th>Schwelle</th><th>Bedingung</th><th>Skip-Grund</th></tr>';
-
-        foreach ($trace as $t) {
-            if ($t['skip_reason'] && strpos($t['skip_reason'], 'solo') !== false) {
-                $tr_class = 'solo';
-            } elseif ($t['skip_reason'] && strpos($t['skip_reason'], 'not next') !== false) {
-                $tr_class = 'not-next';
-            } elseif ($t['condition_met']) {
-                $tr_class = 'hit';
-            } else {
-                $tr_class = 'ok';
-            }
-
-            $skip      = $t['skip_reason'] ? '<span class="skip">' . htmlspecialchars($t['skip_reason']) . '</span>' : '–';
-            $condition = $t['condition_met'] ? '<span class="hit">JA</span>' : 'nein';
-            $last_post = $t['last_post'] ? date('d.m.Y H:i', $t['last_post']) : '–';
-            $note      = isset($t['skip_reason_note']) ? '<br><i>' . htmlspecialchars($t['skip_reason_note']) . '</i>' : '';
-
-            echo '<tr class="' . $tr_class . '">'
-               . '<td>' . htmlspecialchars($t['category_name']) . '</td>'
-               . '<td>' . htmlspecialchars($t['username']) . ' (' . $t['uid'] . ')</td>'
-               . '<td>' . $t['scene_id'] . '</td>'
-               . '<td>' . $t['tid'] . '</td>'
-               . '<td>' . $t['free_order'] . '</td>'
-               . '<td>' . ($t['participant_count'] !== null ? $t['participant_count'] : '–') . '</td>'
-               . '<td>' . ($t['next_poster_uid'] !== null ? $t['next_poster_uid'] : '–') . '</td>'
-               . '<td>' . $last_post . $note . '</td>'
-               . '<td>' . ($t['days_waiting'] !== null ? $t['days_waiting'] : '–') . '</td>'
-               . '<td>' . $t['threshold_days'] . '</td>'
-               . '<td>' . $condition . '</td>'
-               . '<td>' . $skip . '</td>'
-               . '</tr>';
+        if ($skip_reason !== '' && strpos($skip_reason, 'solo') !== false) {
+            $tr_class = 'solo';
+        } elseif ($skip_reason !== '' && strpos($skip_reason, 'not next') !== false) {
+            $tr_class = 'not-next';
+        } elseif (!empty($t['condition_met'])) {
+            $tr_class = 'hit';
+        } else {
+            $tr_class = 'ok';
         }
 
-        echo '</table>';
+        $d_category     = htmlspecialchars_uni($t['category_name']);
+        $d_user         = htmlspecialchars_uni($t['username']) . ' (' . (int) $t['uid'] . ')';
+        $d_scene_id     = (int) $t['scene_id'];
+        $d_tid          = (int) $t['tid'];
+        $d_free_order   = (int) $t['free_order'];
+        $d_participants = $t['participant_count'] !== null ? (int) $t['participant_count'] : '–';
+        $d_next_poster  = $t['next_poster_uid'] !== null ? (int) $t['next_poster_uid'] : '–';
+        $d_last_post    = $t['last_post'] ? my_date('d.m.Y H:i', (int) $t['last_post']) : '–';
+        $d_note         = isset($t['skip_reason_note']) ? '<br /><em>' . htmlspecialchars_uni($t['skip_reason_note']) . '</em>' : '';
+        $d_days         = $t['days_waiting'] !== null ? (int) $t['days_waiting'] : '–';
+        $d_threshold    = (int) $t['threshold_days'];
+        $d_condition    = !empty($t['condition_met']) ? '<strong>' . $lang->blacklist_debug_yes . '</strong>' : $lang->blacklist_debug_no;
+        $d_skip         = $skip_reason !== '' ? htmlspecialchars_uni($skip_reason) : '–';
+
+        eval('$debug_rows .= "' . $templates->get('blacklist_debug_row') . '";');
     }
 
-    echo '</body></html>';
+    if ($debug_rows === '') {
+        $debug_rows = '<tr class="trow1"><td colspan="12" class="blacklist-empty-row">' . $lang->blacklist_debug_empty . '</td></tr>';
+    }
+
+    add_breadcrumb($lang->blacklist_debug_title);
+    eval('$page = "' . $templates->get('blacklist_debug') . '";');
+    output_page($page);
     exit;
 }
 
@@ -230,17 +225,16 @@ if ($action === 'activity') {
         $users_html = '';
 
         if (empty($affected)) {
-            $users_html = '<tr class="trow1"><td colspan="2" style="text-align:center;font-style:italic;opacity:0.75;padding:0.8em">'
-                . $lang->blacklist_no_affected . '</td></tr>';
+            eval('$users_html = "' . $templates->get('blacklist_activity_empty_row') . '";');
         } else {
             foreach ($affected as $item) {
                 $user        = $item['user'];
                 $username    = format_name(htmlspecialchars_uni($user['username']), $user['usergroup'], $user['displaygroup']);
-                $profile_url = $mybb->settings['bburl'] . '/member.php?action=profile&uid=' . (int) $user['uid'];
+                $profile_url = htmlspecialchars_uni($mybb->settings['bburl'] . '/member.php?action=profile&uid=' . (int) $user['uid']);
                 $detail_html = '';
 
                 if (!empty($item['scenes'])) {
-                    $detail_html = '<ul class="blacklist-scene-list">';
+                    $scene_items = '';
                     foreach ($item['scenes'] as $sc) {
                         $sc_scene = $sc['scene'];
                         $sc_days  = (int) $sc['days_inactive'];
@@ -253,21 +247,16 @@ if ($action === 'activity') {
                                 $mybb->settings['bburl'] . '/showthread.php?tid=' . (int) $sc_scene['tid']
                               ) . '">' . $sc_subj . '</a>'
                             : $sc_subj;
-                        $detail_html .= '<li class="blacklist-scene-list-item">'
-                            . $sc_link
-                            . ' <span class="blacklist-scene-meta">'
-                            . $sc_date
-                            . ' (' . $sc_days . ' ' . $lang->blacklist_lbl_days . ')'
-                            . '</span></li>';
+                        eval('$scene_items .= "' . $templates->get('blacklist_activity_scene_item') . '";');
                     }
-                    $detail_html .= '</ul>';
+                    eval('$detail_html = "' . $templates->get('blacklist_activity_scene_list') . '";');
                 } else {
                     $last_ts  = $item['last_timestamp'];
                     $date_str = $last_ts ? my_date('d.m.Y', (int) $last_ts) : '–';
                     $days_str = $item['days_inactive'] !== null
                         ? ' (' . (int) $item['days_inactive'] . ' ' . $lang->blacklist_lbl_days . ')'
                         : '';
-                    $detail_html = '<span class="blacklist-detail-date">' . $date_str . $days_str . '</span>';
+                    eval('$detail_html = "' . $templates->get('blacklist_activity_date') . '";');
                 }
 
                 eval('$users_html .= "' . $templates->get('blacklist_activity_user_row') . '";');
@@ -294,8 +283,7 @@ if ($action === 'activity') {
 $active_run  = $engine->getActiveRun();
 $closed_run  = $engine->getLastClosedRun();
 $is_team     = blacklist_is_team();
-$activity_url = $mybb->settings['bburl'] . '/blacklist.php?action=activity';
-$post_key    = $mybb->post_code;
+$activity_url = htmlspecialchars_uni($mybb->settings['bburl'] . '/blacklist.php?action=activity');
 
 $run_notice_html    = '';
 $run_actions_html   = '';
@@ -337,8 +325,7 @@ if ($active_run) {
     if ($max_deadline > 0) {
         $dl_str      = my_date('d.m.Y', $max_deadline);
         $overdue_cls = $max_deadline < TIME_NOW ? ' blacklist-overdue' : '';
-        $deadline_info_html = '<p class="blacklist-deadline-info smalltext' . $overdue_cls . '">'
-            . $lang->blacklist_deadline . ': <strong>' . $dl_str . '</strong></p>';
+        eval('$deadline_info_html = "' . $templates->get('blacklist_deadline_info') . '";');
     }
 
     // Intro text
@@ -360,10 +347,6 @@ if ($active_run) {
     }
 
     // Build category tables
-    $svg_attrs = 'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="blacklist-icon"';
-    $svg_check = '<svg viewBox="0 0 16 16" ' . $svg_attrs . ' aria-hidden="true"><polyline points="3,8 6,12 13,4"/></svg>';
-    $svg_trash = '<svg viewBox="0 0 16 16" ' . $svg_attrs . ' aria-hidden="true"><polyline points="3,5 13,5"/><path d="M5 5v8h6V5M7 5V3h2v2"/></svg>';
-
     foreach ($cat_index as $cid => $category) {
         if (empty($grouped[$cid])) {
             continue;
@@ -374,21 +357,20 @@ if ($active_run) {
 
         $has_scene_col = $category['type'] === 'scene_wait';
         if ($has_scene_col) {
-            $cat_col2_header = '<td class="tcat" width="63%"><strong>' . $lang->blacklist_col_scene . '</strong></td>';
-            $user_col_width  = 'width="22%"';
+            eval('$cat_col2_header = "' . $templates->get('blacklist_category_scene_header') . '";');
+            $user_col_width = 'width="22%"';
         } else {
             $cat_col2_header = '';
             $user_col_width  = 'width="85%"';
         }
 
         foreach ($grouped[$cid] as $entry) {
+            $entry_id       = (int) $entry['id'];
             $user_html      = blacklist_entry_user_html($entry);
             $thread_link    = '';
             $entry_col2     = '';
             $overdue_class  = '';
             $resolved_class = '';
-            $resolve_btn    = '';
-            $team_btns      = '';
             $is_resolved    = $entry['status'] === 'resolved';
 
             if ($is_resolved) {
@@ -397,48 +379,37 @@ if ($active_run) {
                 $overdue_class = $entry['deadline'] < TIME_NOW ? ' blacklist-overdue' : '';
             }
 
-            if ($has_scene_col && (int) $entry['thread_id'] > 0 && !empty($entry['thread_subject'])) {
-                $t_url       = $mybb->settings['bburl'] . '/showthread.php?tid=' . (int) $entry['thread_id'];
-                $t_subj      = htmlspecialchars_uni($entry['thread_subject']);
-                $thread_link = '<a href="' . $t_url . '">' . $t_subj . '</a>';
+            if ($has_scene_col) {
+                if ((int) $entry['thread_id'] > 0 && !empty($entry['thread_subject'])) {
+                    $t_url       = htmlspecialchars_uni($mybb->settings['bburl'] . '/showthread.php?tid=' . (int) $entry['thread_id']);
+                    $t_subj      = htmlspecialchars_uni($entry['thread_subject']);
+                    $thread_link = '<a href="' . $t_url . '">' . $t_subj . '</a>';
+                }
+                eval('$entry_col2 = "' . $templates->get('blacklist_entry_scene_cell') . '";');
             }
 
-            if ($has_scene_col) {
-                $entry_col2 = '<td class="smalltext">' . $thread_link . '</td>';
-            }
+            $action_html = '';
 
             if ($is_resolved) {
-                $action_html = '<span class="blacklist-status-resolved smalltext">' . $svg_check . ' ' . $lang->blacklist_status_resolved . '</span>';
+                eval('$action_html = "' . $templates->get('blacklist_entry_resolved') . '";');
                 if ($is_team) {
-                    $entry_id    = (int) $entry['id'];
-                    $action_html .= ' <form method="post" action="blacklist.php" style="display:inline;white-space:nowrap">'
-                        . '<input type="hidden" name="my_post_key" value="' . $post_key . '">'
-                        . '<input type="hidden" name="entry_id" value="' . $entry_id . '">'
-                        . '<button name="action" value="delete" class="blacklist-icon-btn" title="' . $lang->blacklist_btn_delete . '">' . $svg_trash . ' ' . $lang->blacklist_btn_delete . '</button>'
-                        . '</form>';
+                    $action_html .= ' ' . blacklist_entry_button('delete', $entry_id, $lang->blacklist_btn_delete, $lang->blacklist_confirm_delete);
                 }
             } else {
                 if ((int) $entry['uid'] === (int) $mybb->user['uid']) {
                     $response = $entry['response_type'] ?? $category['response_type'];
                     if ($response === 'button' || $response === 'posting') {
-                        $entry_id = (int) $entry['id'];
-                        eval('$resolve_btn = "' . $templates->get('blacklist_entry_button') . '";');
+                        $action_html .= blacklist_entry_button('resolve', $entry_id, $lang->blacklist_btn_im_active);
                     }
                 }
 
                 if ($is_team) {
-                    $entry_id  = (int) $entry['id'];
-                    $team_btns = '<form method="post" action="blacklist.php" style="display:inline;white-space:nowrap">'
-                        . '<input type="hidden" name="my_post_key" value="' . $post_key . '">'
-                        . '<input type="hidden" name="entry_id" value="' . $entry_id . '">'
-                        . '<button name="action" value="team_resolve" class="blacklist-icon-btn" title="' . $lang->blacklist_btn_resolve . '">' . $svg_check . ' ' . $lang->blacklist_btn_resolve . '</button>'
-                        . '<button name="action" value="delete" class="blacklist-icon-btn" title="' . $lang->blacklist_btn_delete . '">' . $svg_trash . ' ' . $lang->blacklist_btn_delete . '</button>'
-                        . '</form>';
+                    $action_html .= blacklist_entry_button('team_resolve', $entry_id, $lang->blacklist_btn_resolve);
+                    $action_html .= blacklist_entry_button('delete', $entry_id, $lang->blacklist_btn_delete, $lang->blacklist_confirm_delete);
                 }
 
-                $action_html = $resolve_btn . $team_btns;
                 if ($action_html === '') {
-                    $action_html = '<span class="smalltext">' . $lang->blacklist_action_none . '</span>';
+                    eval('$action_html = "' . $templates->get('blacklist_entry_no_action') . '";');
                 }
             }
 
@@ -459,26 +430,10 @@ if ($active_run) {
             $all_cats_options .= '<option value="' . (int) $cat['id'] . '">'
                 . htmlspecialchars_uni($cat['name']) . '</option>';
         }
-        $add_form_html = '<div class="tborder blacklist-add-bar">'
-            . '<form method="post" action="blacklist.php" class="blacklist-add-form">'
-            . '<input type="hidden" name="my_post_key" value="' . $post_key . '">'
-            . '<input type="hidden" name="action" value="add">'
-            . '<label class="smalltext">' . $lang->blacklist_lbl_uid . '<input type="number" name="uid" min="1" required style="width:70px"></label>'
-            . '<label class="smalltext">' . $lang->blacklist_lbl_category . '<select name="category_id">' . $all_cats_options . '</select></label>'
-            . '<label class="smalltext">' . $lang->blacklist_lbl_thread . '<input type="number" name="thread_id" min="0" value="0" style="width:70px"></label>'
-            . '<input type="submit" class="button" value="+ ' . $lang->blacklist_btn_add . '">'
-            . '</form>'
-            . '</div>';
-    }
+        eval('$add_form_html = "' . $templates->get('blacklist_add_form') . '";');
 
-    // Team: close run button
-    if ($is_team) {
-        $run_actions_html = '<div class="blacklist-run-actions">'
-            . '<form method="post" action="blacklist.php">'
-            . '<input type="hidden" name="my_post_key" value="' . $post_key . '">'
-            . '<button name="action" value="close_run" class="button" onclick="return confirm(\'' . $lang->blacklist_run_close_confirm . '\')">'
-            . $lang->blacklist_btn_close_run
-            . '</button></form></div>';
+        // Team: close run button
+        $run_actions_html = blacklist_run_button('close_run', $lang->blacklist_btn_close_run, $lang->blacklist_run_close_confirm);
     }
 
 } elseif ($closed_run) {
@@ -497,10 +452,8 @@ if ($active_run) {
         $closer_name = '–';
     }
 
-    $run_notice_html = '<table border="0" cellspacing="1" cellpadding="8" class="tborder blacklist-run-notice" style="margin-bottom:12px;width:100%">'
-        . '<tr><td class="tcat"><strong>' . $lang->blacklist_run_closed_title . '</strong></td></tr>'
-        . '<tr><td class="trow1">' . sprintf($lang->blacklist_run_closed_notice, '<strong>' . $closed_date . '</strong>', $closer_name) . '</td></tr>'
-        . '</table>';
+    $run_closed_text = sprintf($lang->blacklist_run_closed_notice, '<strong>' . $closed_date . '</strong>', $closer_name);
+    eval('$run_notice_html = "' . $templates->get('blacklist_run_notice') . '";');
 
     $closed_entries = $engine->getEntriesForRun((int) $closed_run['id']);
 
@@ -514,10 +467,10 @@ if ($active_run) {
         }
     }
 
-    $no_entries_row = '<tr class="trow1"><td colspan="2" class="smalltext" style="text-align:center;font-style:italic;padding:0.8em">'
-        . $lang->blacklist_run_no_entries . '</td></tr>';
+    $no_entries_row = '';
+    eval('$no_entries_row = "' . $templates->get('blacklist_run_empty_row') . '";');
 
-    // Section 1: Zurückgemeldet
+    // Section 1: responded
     $section_entries_html = '';
     foreach ($responded as $entry) {
         $user_html   = blacklist_entry_user_html($entry);
@@ -531,7 +484,7 @@ if ($active_run) {
     $section_hdr_class = '';
     eval('$responded_section_html = "' . $templates->get('blacklist_run_section') . '";');
 
-    // Section 2: Nicht zurückgemeldet
+    // Section 2: did not respond
     $section_entries_html = '';
     foreach ($not_responded as $entry) {
         $user_html   = blacklist_entry_user_html($entry);
@@ -549,12 +502,7 @@ if ($active_run) {
 
     // Team: new run button
     if ($is_team) {
-        $run_actions_html = '<div class="blacklist-run-actions">'
-            . '<form method="post" action="blacklist.php">'
-            . '<input type="hidden" name="my_post_key" value="' . $post_key . '">'
-            . '<button name="action" value="new_run" class="button">'
-            . $lang->blacklist_btn_new_run
-            . '</button></form></div>';
+        $run_actions_html = blacklist_run_button('new_run', $lang->blacklist_btn_new_run);
     }
 
 } else {
@@ -563,12 +511,7 @@ if ($active_run) {
     eval('$no_entries_html = "' . $templates->get('blacklist_no_entries') . '";');
 
     if ($is_team) {
-        $run_actions_html = '<div class="blacklist-run-actions">'
-            . '<form method="post" action="blacklist.php">'
-            . '<input type="hidden" name="my_post_key" value="' . $post_key . '">'
-            . '<button name="action" value="new_run" class="button">'
-            . $lang->blacklist_btn_new_run
-            . '</button></form></div>';
+        $run_actions_html = blacklist_run_button('new_run', $lang->blacklist_btn_new_run);
     }
 }
 
@@ -589,7 +532,7 @@ output_page($page);
  */
 function blacklist_entry_user_html(array $entry): string
 {
-    global $mybb, $lang;
+    global $mybb, $lang, $templates;
 
     $user_deleted = !isset($entry['username']) || $entry['username'] === null || $entry['username'] === '';
 
@@ -598,14 +541,48 @@ function blacklist_entry_user_html(array $entry): string
         if ($stored === '') {
             $stored = '#' . (int) $entry['uid'];
         }
-        return '<span class="blacklist-deleted-user">' . htmlspecialchars_uni($stored) . '</span>'
-            . ' <span class="blacklist-deleted-note smalltext">' . $lang->blacklist_user_deleted . '</span>';
+        $stored_name = htmlspecialchars_uni($stored);
+        $html        = '';
+        eval('$html = "' . $templates->get('blacklist_user_deleted') . '";');
+        return $html;
     }
 
     $username    = format_name(htmlspecialchars_uni($entry['username']), $entry['usergroup'], $entry['displaygroup']);
     $profile_url = htmlspecialchars_uni($mybb->settings['bburl'] . '/member.php?action=profile&uid=' . (int) $entry['uid']);
+    $html        = '';
+    eval('$html = "' . $templates->get('blacklist_user_link') . '";');
+    return $html;
+}
 
-    return '<a href="' . $profile_url . '">' . $username . '</a>';
+/**
+ * Renders one entry action (POST form + input.button) via template
+ * blacklist_entry_button. $confirm adds a JS confirmation on submit.
+ */
+function blacklist_entry_button(string $action, int $entry_id, string $label, string $confirm = ''): string
+{
+    global $mybb, $templates;
+
+    $button_action  = htmlspecialchars_uni($action);
+    $button_label   = htmlspecialchars_uni($label);
+    $button_confirm = $confirm !== '' ? ' onsubmit="return confirm(' . blacklist_js_string($confirm) . ');"' : '';
+    $html           = '';
+    eval('$html = "' . $templates->get('blacklist_entry_button') . '";');
+    return $html;
+}
+
+/**
+ * Renders a run action (close_run / new_run) via template blacklist_run_button.
+ */
+function blacklist_run_button(string $action, string $label, string $confirm = ''): string
+{
+    global $mybb, $templates;
+
+    $run_action  = htmlspecialchars_uni($action);
+    $run_label   = htmlspecialchars_uni($label);
+    $run_confirm = $confirm !== '' ? ' onsubmit="return confirm(' . blacklist_js_string($confirm) . ');"' : '';
+    $html        = '';
+    eval('$html = "' . $templates->get('blacklist_run_button') . '";');
+    return $html;
 }
 
 // ------------------------------------------------------------------
@@ -629,6 +606,8 @@ function blacklist_activity_condition(string $type, int $days, $lang): string
             return sprintf($lang->blacklist_condition_no_subaccount, $days);
         case 'no_active_scene':
             return $lang->blacklist_condition_no_active_scene;
+        case 'frozen':
+            return sprintf($lang->blacklist_condition_frozen, $days);
         default:
             return '';
     }

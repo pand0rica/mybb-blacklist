@@ -15,11 +15,10 @@
     pointer-events: none;
 }
 
-/* Smaller icons in action buttons */
+/* Smaller icons in the actions column */
 .blacklist-entry-actions .blacklist-icon {
     width: 0.9em;
     height: 0.9em;
-    /*width:12px;height:12px;vertical-align:-2px*/
 }
 
 /* ── Navigation ────────────────────────────────────────────────────────────── */
@@ -60,17 +59,9 @@
 .blacklist-deleted-user { text-decoration: line-through; opacity: 0.8; }
 .blacklist-deleted-note  { font-style: italic; opacity: 0.7; }
 
-/* ── Icon-only action buttons ──────────────────────────────────────────────── */
-.blacklist-icon-btn {
-    padding: 3px 6px;
-    cursor: pointer;
-    border: 1px solid var(--h4w-border-strong, #aaa);
-    border-radius: 3px;
-    background: transparent;
-    line-height: 1;
-    margin-left: 3px;
-}
-.blacklist-icon-btn:hover { border-color: var(--h4w-border-dark, #666); }
+/* ── Action buttons (look comes from the theme's input.button) ─────────────── */
+.blacklist-inline-form { display: inline; margin: 0; }
+.blacklist-inline-form + .blacklist-inline-form { margin-left: 4px; }
 
 /* ── Add form ──────────────────────────────────────────────────────────────── */
 .blacklist-add-bar {
@@ -90,13 +81,7 @@
     gap: 3px;
     font-size: 0.85em;
 }
-.blacklist-add-form input[type="number"],
-.blacklist-add-form select {
-    padding: 4px 6px;
-    border: 1px solid var(--h4w-border, #ccc);
-    border-radius: 3px;
-    font-size: 0.85em;
-}
+.blacklist-add-form .blacklist-add-number { width: 70px; }
 
 /* ── Activity simulation ───────────────────────────────────────────────────── */
 .blacklist-activity-hint      { font-style: italic; }
@@ -110,8 +95,26 @@
 .blacklist-scene-meta      { opacity: 0.7; font-size: 0.9em; }
 .blacklist-detail-label    { opacity: 0.75; }
 
+/* ── Empty-state rows ──────────────────────────────────────────────────────── */
+.blacklist-empty-row {
+    text-align: center;
+    font-style: italic;
+    opacity: 0.75;
+    padding: 0.8em;
+}
+
+/* ── Team debug trace ──────────────────────────────────────────────────────── */
+.blacklist-debug-table { width: 100%; font-size: 0.9em; }
+.blacklist-debug-solo,     tr.blacklist-debug-solo td     { background: #fee; }
+.blacklist-debug-not-next, tr.blacklist-debug-not-next td { background: #ffd; }
+.blacklist-debug-hit,      tr.blacklist-debug-hit td      { background: #ffc; }
+.blacklist-debug-ok,       tr.blacklist-debug-ok td       { background: #efe; }
+.blacklist-debug-solo, .blacklist-debug-not-next,
+.blacklist-debug-hit,  .blacklist-debug-ok { padding: 2px 6px; }
+
 /* ── Run management ────────────────────────────────────────────────────────── */
 .blacklist-run-notice {
+    width: 100%;
     margin-bottom: 12px;
 }
 .blacklist-run-actions {

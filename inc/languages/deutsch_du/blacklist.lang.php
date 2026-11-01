@@ -9,9 +9,6 @@ $l['blacklist_nav_activity'] = 'Aktivitätsübersicht';
 
 // Entry labels
 $l['blacklist_deadline']      = 'Frist';
-$l['blacklist_days_inactive'] = 'Tage inaktiv';
-$l['blacklist_would_be_listed'] = 'Würde gelistet werden';
-$l['blacklist_activity_ok']     = 'Aktiv – kein Eintrag';
 
 // Buttons
 $l['blacklist_btn_im_active'] = 'Ich bleibe aktiv!';
@@ -46,6 +43,7 @@ $l['blacklist_condition_posting']       = 'Kein Post weltweit seit %d Tagen';
 $l['blacklist_condition_group']         = 'Mitglied in bestimmter Gruppe';
 $l['blacklist_condition_no_subaccount'] = 'Seit %d+ Tagen registriert, kein Unteraccount verknüpft';
 $l['blacklist_condition_no_active_scene'] = 'Keine legitime aktive Szene (mind. 2 Teilnehmer)';
+$l['blacklist_condition_frozen']        = '"Eingefroren bis"-Datum seit %d+ Tagen überschritten';
 
 // Activity simulation – date/detail labels
 $l['blacklist_lbl_last_login']    = 'Letzter Login';
@@ -87,3 +85,26 @@ $l['blacklist_run_no_entries']          = 'Keine Einträge.';
 
 // Thread-Benachrichtigung beim Start eines neuen Runs (%1$s = Frist-Datum, %2$s = Blacklist-URL)
 $l['blacklist_notify_message'] = "Eine neue Blacklist wurde veröffentlicht.\n\nRückmeldefrist: [b]%1\$s[/b]\n\n[url=%2\$s]Zur aktuellen Blacklist[/url]";
+
+// Bestätigungen
+$l['blacklist_confirm_delete'] = 'Diesen Blacklist-Eintrag wirklich löschen?';
+
+// Team-Debug-Ansicht (blacklist.php?action=activity&debug=1)
+$l['blacklist_debug_title']              = 'Blacklist-Debug: scene_wait';
+$l['blacklist_debug_back']               = 'Zurück';
+$l['blacklist_debug_legend']             = 'Legende';
+$l['blacklist_debug_legend_solo']        = 'Solo-Szene';
+$l['blacklist_debug_legend_not_next']    = 'Nicht dran';
+$l['blacklist_debug_legend_hit']         = 'Bedingung erfüllt';
+$l['blacklist_debug_legend_ok']          = 'OK';
+$l['blacklist_debug_col_category']       = 'Kategorie';
+$l['blacklist_debug_col_user']           = 'Nutzer (uid)';
+$l['blacklist_debug_col_participants']   = 'Teilnehmer';
+$l['blacklist_debug_col_last_post']      = 'Letzter Post';
+$l['blacklist_debug_col_days']           = 'Tage';
+$l['blacklist_debug_col_threshold']      = 'Schwelle';
+$l['blacklist_debug_col_condition']      = 'Bedingung';
+$l['blacklist_debug_col_skip']           = 'Skip-Grund';
+$l['blacklist_debug_yes']                = 'JA';
+$l['blacklist_debug_no']                 = 'nein';
+$l['blacklist_debug_empty']              = 'Keine scene_wait-Kategorien aktiv oder Logbook nicht installiert.';

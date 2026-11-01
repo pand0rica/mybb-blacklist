@@ -4,7 +4,7 @@
  * Plugin URI:  https://github.com/pand0rica/mybb-blacklist
  * Description: Scene-based activity blacklist with Logbook integration for RPG forums.
  * Author:      pand0rica
- * Version:     1.6.1
+ * Version:     1.6.2
  * MyBB:        1.8.x
  */
 
@@ -19,7 +19,6 @@ if (!defined('IN_MYBB')) {
 $plugins->add_hook('global_start',                  'blacklist_load_language');
 $plugins->add_hook('newreply_do_newreply_end',      'blacklist_handle_new_post');
 $plugins->add_hook('newthread_do_newthread_end',    'blacklist_handle_new_post');
-$plugins->add_hook('logbook_scene_created',         'blacklist_on_scene_created');
 $plugins->add_hook('logbook_scene_finished_changed','blacklist_on_scene_finished');
 $plugins->add_hook('index_start',                   'blacklist_build_index_notice');
 $plugins->add_hook('datahandler_user_delete_start', 'blacklist_handle_user_delete');
@@ -41,7 +40,7 @@ function blacklist_info(): array
         'website'       => 'https://github.com/pand0rica/mybb-blacklist',
         'author'        => 'pand0rica',
         'authorsite'    => 'https://github.com/pand0rica',
-        'version'       => '1.6.1',
+        'version'       => '1.6.2',
         'guid'          => '',
         'compatibility' => '18*',
     ];
@@ -541,6 +540,50 @@ function blacklist_install_template_group(): void
     ]);
 }
 
+/**
+ * All template names of the plugin. Each one is loaded from
+ * inc/plugins/blacklist/templates/<name>.tpl on activate().
+ */
+function blacklist_template_names(): array
+{
+    return [
+        // Main page
+        'blacklist',
+        'blacklist_intro',
+        'blacklist_deadline_info',
+        'blacklist_category',
+        'blacklist_category_scene_header',
+        'blacklist_entry',
+        'blacklist_entry_scene_cell',
+        'blacklist_entry_button',
+        'blacklist_entry_resolved',
+        'blacklist_entry_no_action',
+        'blacklist_no_entries',
+        'blacklist_add_form',
+        'blacklist_run_button',
+        'blacklist_run_notice',
+        'blacklist_run_section',
+        'blacklist_run_empty_row',
+        'blacklist_closed_entry',
+        'blacklist_user_link',
+        'blacklist_user_deleted',
+        // Activity simulation
+        'blacklist_activity',
+        'blacklist_activity_category',
+        'blacklist_activity_user_row',
+        'blacklist_activity_empty_row',
+        'blacklist_activity_scene_list',
+        'blacklist_activity_scene_item',
+        'blacklist_activity_date',
+        // Team debug trace
+        'blacklist_debug',
+        'blacklist_debug_row',
+        // Forum index notice
+        'blacklist_index_notice',
+        'blacklist_index_notice_row',
+    ];
+}
+
 function blacklist_install_templates(): void
 {
     global $db;
@@ -550,25 +593,8 @@ function blacklist_install_templates(): void
 
     $templates_dir = MYBB_ROOT . 'inc/plugins/blacklist/templates/';
 
-    $files = [
-        'blacklist'              => 'blacklist.tpl',
-        'blacklist_intro'        => 'blacklist_intro.tpl',
-        'blacklist_category'     => 'blacklist_category.tpl',
-        'blacklist_entry'        => 'blacklist_entry.tpl',
-        'blacklist_entry_button' => 'blacklist_entry_button.tpl',
-        'blacklist_activity'          => 'blacklist_activity.tpl',
-        'blacklist_activity_row'     => 'blacklist_activity_row.tpl',
-        'blacklist_activity_category'=> 'blacklist_activity_category.tpl',
-        'blacklist_activity_user_row'=> 'blacklist_activity_user_row.tpl',
-        'blacklist_no_entries'       => 'blacklist_no_entries.tpl',
-        'blacklist_run_section'      => 'blacklist_run_section.tpl',
-        'blacklist_closed_entry'     => 'blacklist_closed_entry.tpl',
-        'blacklist_index_notice'     => 'blacklist_index_notice.tpl',
-        'blacklist_index_notice_row' => 'blacklist_index_notice_row.tpl',
-    ];
-
-    foreach ($files as $title => $file) {
-        $path = $templates_dir . $file;
+    foreach (blacklist_template_names() as $title) {
+        $path = $templates_dir . $title . '.tpl';
 
         if (!file_exists($path)) {
             continue;
@@ -609,14 +635,14 @@ function blacklist_install_stylesheet(): void
         $tid = (int) $theme['tid'];
 
         $existing = $db->fetch_array(
-            $db->simple_select('themestylesheets', 'sid', "name = 'blacklist.css' AND tid = '{$tid}'")
+            $db->simple_select('themestylesheets', 'sid', "name = 'blacklist.css' AND tid = " . $tid)
         );
 
         if ($existing) {
             $db->update_query('themestylesheets', [
                 'stylesheet'   => $css_escaped,
                 'lastmodified' => TIME_NOW,
-            ], "sid = '" . (int) $existing['sid'] . "'", 1);
+            ], 'sid = ' . (int) $existing['sid'], 1);
         } else {
             $sid = $db->insert_query('themestylesheets', [
                 'name'         => 'blacklist.css',
@@ -626,7 +652,8 @@ function blacklist_install_stylesheet(): void
                 'cachefile'    => 'blacklist.css',
                 'lastmodified' => TIME_NOW,
             ]);
-            $db->update_query('themestylesheets', ['cachefile' => "css.php?stylesheet={$sid}"], "sid = '{$sid}'", 1);
+            $sid = (int) $sid;
+            $db->update_query('themestylesheets', ['cachefile' => "css.php?stylesheet={$sid}"], 'sid = ' . $sid, 1);
         }
 
         update_theme_stylesheet_list($tid);
@@ -637,19 +664,30 @@ function blacklist_install_stylesheet(): void
 // Hook handlers
 // ---------------------------------------------------------------------------
 
+/**
+ * Hook: global_start
+ * Loads the frontend language file and adds the plugin templates used on the
+ * current script to the template cache list (saves one query per template).
+ */
 function blacklist_load_language(): void
 {
     global $lang, $templatelist;
+
     $lang->load('blacklist');
 
-    // Pre-cache the index notice templates (global_start runs before the template cache is filled)
-    if (defined('THIS_SCRIPT') && THIS_SCRIPT === 'index.php') {
-        if (isset($templatelist)) {
-            $templatelist .= ',';
-        } else {
-            $templatelist = '';
-        }
-        $templatelist .= 'blacklist_index_notice,blacklist_index_notice_row';
+    if (!defined('THIS_SCRIPT')) {
+        return;
+    }
+
+    $list = [];
+    if (THIS_SCRIPT === 'index.php') {
+        $list = ['blacklist_index_notice', 'blacklist_index_notice_row'];
+    } elseif (THIS_SCRIPT === 'blacklist.php') {
+        $list = blacklist_template_names();
+    }
+
+    if (!empty($list)) {
+        $templatelist = (isset($templatelist) && $templatelist !== '' ? $templatelist . ',' : '') . implode(',', $list);
     }
 }
 
@@ -690,16 +728,6 @@ function blacklist_handle_new_post(): void
         // The new post's timestamp is roughly TIME_NOW; entry was added before this post
         $engine->resolveEntry((int) $entry['id']);
     }
-}
-
-/**
- * Hook: logbook_scene_created
- * Immediately check scene participants against open categories when a new scene is created.
- */
-function blacklist_on_scene_created(array &$hook_data): void
-{
-    // Intentionally lightweight – full check runs via scheduled task.
-    // Could be extended to immediately flag participants if needed.
 }
 
 /**
@@ -945,7 +973,7 @@ function blacklist_admin_tools_menu(&$sub_menu)
 {
     global $lang;
 
-    $lang->load('blacklist', true);
+    $lang->load('blacklist');
 
     $sub_menu[] = [
         'id'    => 'blacklist',
@@ -959,6 +987,21 @@ function blacklist_load_admin_language(): void
     global $lang;
     $lang->load('blacklist');
     blacklist_sync_task_schedule();
+}
+
+// ---------------------------------------------------------------------------
+// Output helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns $text as a JavaScript string literal that is safe inside a
+ * double-quoted HTML attribute (e.g. onsubmit="return confirm(...)").
+ */
+function blacklist_js_string(string $text): string
+{
+    return htmlspecialchars_uni(
+        (string) json_encode($text, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE)
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -994,12 +1037,12 @@ function blacklist_is_team(): bool
         array_map('intval', explode(',', (string) ($mybb->user['additionalgroups'] ?? '')))
     );
 
-    if (in_array($uid_group, $mod_groups)) {
+    if (in_array($uid_group, $mod_groups, true)) {
         return true;
     }
 
     foreach ($add_groups as $ag) {
-        if (in_array($ag, $mod_groups)) {
+        if (in_array($ag, $mod_groups, true)) {
             return true;
         }
     }

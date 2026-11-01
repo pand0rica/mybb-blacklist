@@ -11,14 +11,14 @@ if (!defined('IN_MYBB')) {
 }
 
 // ------------------------------------------------------------------
-// Permission check + language
+// Language + permission check
 // ------------------------------------------------------------------
+
+$lang->load('blacklist');
 
 if (!$mybb->usergroup['cancp']) {
     admin_redirect('index.php?module=home-index');
 }
-
-$lang->load('blacklist');
 
 // ------------------------------------------------------------------
 // Sub-actions
@@ -88,13 +88,13 @@ function blacklist_acp_nav_tabs(string $active): void
 // ------------------------------------------------------------------
 
 /**
- * Validates my_post_key for state-changing GET links (popup menu items).
+ * Validates my_post_key for every state-changing ACP action.
  *
  * In the ACP, verify_post_check() only *returns* false on mismatch instead of
- * aborting, and the framework's global post-key check covers POST requests
- * only. GET action links must therefore validate the key themselves. The key
- * is unpredictable to an attacker, so a correct key proves the request is
- * genuine → CSRF-safe.
+ * aborting (it never calls error() while IN_ADMINCP is defined). A bare
+ * `verify_post_check(...)` call without checking the return value therefore
+ * protects nothing. Every write handler – POST forms as well as the GET links
+ * of the popup menu – calls this helper, which aborts with a flash message.
  */
 function blacklist_acp_verify_key(): void
 {
@@ -114,7 +114,7 @@ function blacklist_acp_categories(): void
 {
     global $db, $mybb, $lang, $page;
 
-    $page->add_breadcrumb_item('Blacklist', 'index.php?module=tools-blacklist');
+    $page->add_breadcrumb_item($lang->blacklist_acp_title, 'index.php?module=tools-blacklist');
     $page->output_header($lang->blacklist_acp_title);
     blacklist_acp_nav_tabs('categories');
 
@@ -155,7 +155,7 @@ function blacklist_acp_categories(): void
         $popup->add_item(
             $lang->blacklist_delete,
             'index.php?module=tools-blacklist&amp;action=delete_category&amp;id=' . $cat_id . '&amp;my_post_key=' . $post_key,
-            "return AdminCP.deleteConfirmation(this, '" . addslashes($lang->blacklist_confirm_delete) . "')"
+            'return AdminCP.deleteConfirmation(this, ' . blacklist_js_string($lang->blacklist_confirm_delete) . ')'
         );
 
         $table->construct_cell((int) $cat['id']);
@@ -187,7 +187,7 @@ function blacklist_acp_add_category(): void
     global $db, $mybb, $lang, $page;
 
     if ($mybb->request_method === 'post') {
-        verify_post_check($mybb->get_input('my_post_key'));
+        blacklist_acp_verify_key();
 
         $input  = blacklist_acp_collect_category_input();
         $errors = blacklist_acp_validate_category($input);
@@ -223,7 +223,7 @@ function blacklist_acp_edit_category(): void
     }
 
     if ($mybb->request_method === 'post') {
-        verify_post_check($mybb->get_input('my_post_key'));
+        blacklist_acp_verify_key();
 
         $input  = blacklist_acp_collect_category_input();
         $errors = blacklist_acp_validate_category($input);
@@ -300,7 +300,7 @@ function blacklist_acp_category_form(?array $cat, array $data, array $errors): v
         ? 'index.php?module=tools-blacklist&action=edit_category&id=' . (int) $cat['id']
         : 'index.php?module=tools-blacklist&action=add_category';
 
-    $page->add_breadcrumb_item('Blacklist', 'index.php?module=tools-blacklist');
+    $page->add_breadcrumb_item($lang->blacklist_acp_title, 'index.php?module=tools-blacklist');
     $page->add_breadcrumb_item($title);
     $page->output_header($title);
     blacklist_acp_nav_tabs($is_edit ? 'categories' : 'add_category');
@@ -538,7 +538,7 @@ function blacklist_acp_entries(): void
 {
     global $db, $mybb, $lang, $page;
 
-    $page->add_breadcrumb_item('Blacklist', 'index.php?module=tools-blacklist');
+    $page->add_breadcrumb_item($lang->blacklist_acp_title, 'index.php?module=tools-blacklist');
     $page->add_breadcrumb_item($lang->blacklist_acp_entries);
     $page->output_header($lang->blacklist_acp_entries);
     blacklist_acp_nav_tabs('entries');
@@ -593,7 +593,7 @@ function blacklist_acp_entries(): void
             . '<input type="submit" value="' . $lang->blacklist_resolve . '" class="button">'
             . '</form> '
             . '<form method="post" action="index.php?module=tools-blacklist&action=delete_entry" style="display:inline"'
-            . ' onsubmit="return confirm(\'' . addslashes($lang->blacklist_confirm_delete) . '\')">'
+            . ' onsubmit="return confirm(' . blacklist_js_string($lang->blacklist_confirm_delete) . ');">'
             . '<input type="hidden" name="my_post_key" value="' . $mybb->post_code . '">'
             . '<input type="hidden" name="id" value="' . $entry_id . '">'
             . '<input type="submit" value="' . $lang->blacklist_delete . '" class="button">'
@@ -627,8 +627,12 @@ function blacklist_acp_delete_entry(): void
 {
     global $db, $mybb, $lang;
 
-    verify_post_check($mybb->get_input('my_post_key'));
-    $id = $mybb->get_input('id', MyBB::INPUT_INT);
+    if ($mybb->request_method !== 'post') {
+        admin_redirect('index.php?module=tools-blacklist&action=entries');
+    }
+    blacklist_acp_verify_key();
+
+    $id = (int) $mybb->get_input('id', MyBB::INPUT_INT);
     $db->delete_query('blacklist_entries', 'id = ' . $id);
 
     flash_message($lang->blacklist_entry_deleted, 'success');
@@ -639,8 +643,12 @@ function blacklist_acp_resolve_entry(): void
 {
     global $db, $mybb, $lang;
 
-    verify_post_check($mybb->get_input('my_post_key'));
-    $id = $mybb->get_input('id', MyBB::INPUT_INT);
+    if ($mybb->request_method !== 'post') {
+        admin_redirect('index.php?module=tools-blacklist&action=entries');
+    }
+    blacklist_acp_verify_key();
+
+    $id = (int) $mybb->get_input('id', MyBB::INPUT_INT);
     $db->update_query('blacklist_entries', ['status' => 'resolved'], 'id = ' . $id);
 
     flash_message($lang->blacklist_resolved_success, 'success');
@@ -657,7 +665,7 @@ function blacklist_acp_run_task(): void
 
     // POST: sync schedule
     if ($mybb->request_method === 'post' && $mybb->get_input('do') === 'sync') {
-        verify_post_check($mybb->get_input('my_post_key'));
+        blacklist_acp_verify_key();
         blacklist_sync_task_schedule();
         flash_message($lang->blacklist_task_synced, 'success');
         admin_redirect('index.php?module=tools-blacklist&action=run_task');
@@ -665,7 +673,7 @@ function blacklist_acp_run_task(): void
 
     // POST: run task now
     if ($mybb->request_method === 'post' && $mybb->get_input('do') === 'run') {
-        verify_post_check($mybb->get_input('my_post_key'));
+        blacklist_acp_verify_key();
 
         require_once MYBB_ROOT . 'inc/plugins/blacklist/core/engine.php';
         $engine = new Blacklist_Engine();
@@ -691,7 +699,7 @@ function blacklist_acp_run_task(): void
 
     // ── Render debug page ──────────────────────────────────────────────────────
 
-    $page->add_breadcrumb_item('Blacklist', 'index.php?module=tools-blacklist');
+    $page->add_breadcrumb_item($lang->blacklist_acp_title, 'index.php?module=tools-blacklist');
     $page->add_breadcrumb_item($lang->blacklist_acp_run_task);
     $page->output_header($lang->blacklist_acp_run_task);
     blacklist_acp_nav_tabs('run_task');

@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.6.2
+
+**Upgrade:** after uploading the files, deactivate and reactivate the plugin once – this reloads the templates (several were added) and the stylesheet. Settings and data are kept.
+
+### Security
+- ACP **Open Entries → Resolve/Delete**: the handlers called `verify_post_check()` without checking its return value. In the ACP that function only returns `false` instead of aborting, and the handlers did not require POST either, so a crafted GET link (`index.php?module=tools-blacklist&action=delete_entry&id=X`) could delete or resolve entries without a valid post key (CSRF). Both handlers now require POST and validate the key via `blacklist_acp_verify_key()`. All other ACP write handlers (category add/edit, task sync/run) use the same checked helper instead of the ineffective bare call.
+- Frontend team actions (`add`, `delete`, `team_resolve`, `close_run`, `new_run`) and the self-removal (`resolve`) are now POST-only; a non-team user calling a team action gets `error_no_permission()` instead of silently landing on the blacklist page.
+
+### Fixed
+- Activity simulation showed an empty condition line for `frozen` categories (missing case + language key `blacklist_condition_frozen`).
+- ACP menu entry forced the *frontend* language file (`$lang->load('blacklist', true)`), which does not contain `blacklist_acp_title`; it now loads the admin language file, where the key lives.
+- ACP module now calls `$lang->load('blacklist')` as its first statement (before the permission redirect) and uses the translated title in all breadcrumbs instead of a hardcoded "Blacklist".
+- Stylesheet installer quoted integer IDs in WHERE clauses (`tid = '1'`, `sid = '5'`); now plain `(int)` comparisons.
+
+### Changed
+- Response type *Post in scene* on entries without a scene (non-scene categories such as posting inactivity, `thread_id = 0`): the "I'm active!" check now accepts any visible post after the entry was created. Previously such entries could never be resolved by the user. The `blacklist_resolved_failed` text was adjusted.
+- Frontend action buttons follow the MyBB button convention: every action (I'm active!, Resolve, Delete, Add entry, Mark as done, Start new blacklist) is its own `<form>` with an `<input type="submit" class="button">`. The custom-styled `<button class="blacklist-icon-btn">` with inline SVG icons is gone, so buttons now take their look from the theme. Deleting an entry on the public page asks for confirmation.
+- All remaining inline HTML of the frontend page and the forum index notice was moved into templates (the forum index notice now uses `blacklist_index_notice` / `blacklist_index_notice_row`; also new: `blacklist_deadline_info`, `blacklist_category_scene_header`, `blacklist_entry_scene_cell`, `blacklist_entry_resolved`, `blacklist_entry_no_action`, `blacklist_add_form`, `blacklist_run_button`, `blacklist_run_notice`, `blacklist_run_empty_row`, `blacklist_user_link`, `blacklist_user_deleted`, `blacklist_activity_empty_row`, `blacklist_activity_scene_list`, `blacklist_activity_scene_item`, `blacklist_activity_date`, `blacklist_debug`, `blacklist_debug_row`). `blacklist_entry_button` is now a generic action button. Inline `style` attributes moved into `blacklist.css`; colours use the `--h4w-*` CSS variables with fallbacks.
+- The team debug trace (`blacklist.php?action=activity&debug=1`) is now a normal forum page (header/footer, templates) and fully translatable instead of a raw HTML page with hardcoded German strings.
+- Plugin templates are added to `$templatelist` on `index.php` and `blacklist.php` (fewer queries).
+- Confirmation texts in JavaScript attributes are escaped via the new helper `blacklist_js_string()` (JSON + HTML escaping) instead of `addslashes()`.
+- Removed: unused template `blacklist_activity_row`, unused language keys (`blacklist_days_inactive`, `blacklist_would_be_listed`, `blacklist_activity_ok`), the no-op `logbook_scene_created` hook handler, the unused `{$usercpnav}` placeholder and an unused `global $db`.
+
+### Docs
+- README: update instructions, corrected activity-simulation description (shows all affected accounts; there is no `&uid=` parameter), index-notice behaviour without EnhancedAccountSwitcher, debug trace, tips, precise deactivate/uninstall cleanup.
+- Added `AGENTS.md`, `PROJECT_CONTEXT.md`; `CLAUDE.md` is now a pointer to them. `LICENSE` now contains the complete GPL-3.0 text.
+
+---
+
 ## 1.6.1
 
 ### Fixed
