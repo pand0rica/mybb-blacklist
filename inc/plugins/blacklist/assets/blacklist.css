@@ -32,7 +32,7 @@
     padding: 0;
 }
 .blacklist-deadline-info.blacklist-overdue strong {
-    color: #c00;
+    color: var(--h4w-color-danger, #c00);
 }
 
 /* ── Intro text ────────────────────────────────────────────────────────────── */
@@ -50,7 +50,7 @@
 .blacklist-entry-actions form { display: inline; margin: 0; }
 
 /* Overdue row: subtle highlight */
-.blacklist-overdue .blacklist-entry-user { color: #c00; }
+.blacklist-overdue .blacklist-entry-user { color: var(--h4w-color-danger, #c00); }
 
 /* Resolved row: muted, user has responded */
 .blacklist-resolved { opacity: 0.55; }
@@ -64,13 +64,13 @@
 .blacklist-icon-btn {
     padding: 3px 6px;
     cursor: pointer;
-    border: 1px solid #aaa;
+    border: 1px solid var(--h4w-border-strong, #aaa);
     border-radius: 3px;
     background: transparent;
     line-height: 1;
     margin-left: 3px;
 }
-.blacklist-icon-btn:hover { border-color: #666; }
+.blacklist-icon-btn:hover { border-color: var(--h4w-border-dark, #666); }
 
 /* ── Add form ──────────────────────────────────────────────────────────────── */
 .blacklist-add-bar {
@@ -93,7 +93,7 @@
 .blacklist-add-form input[type="number"],
 .blacklist-add-form select {
     padding: 4px 6px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--h4w-border, #ccc);
     border-radius: 3px;
     font-size: 0.85em;
 }
@@ -119,7 +119,20 @@
     margin-bottom: 12px;
 }
 .blacklist-tcat-danger {
-    border-left: 4px solid #c44;
+    border-left: 4px solid var(--h4w-blacklist-tcat-danger-border, #c44);
+}
+
+/* ── Index notice (forum index, above the board list) ─────────────────────── */
+.blacklist-index-notice {
+    width: 100%;
+    margin-bottom: 10px;
+}
+.blacklist-index-notice-head { padding: 7px 12px; }
+.blacklist-index-notice-body { padding: 8px 12px; }
+.blacklist-index-notice-list {
+    margin: 0;
+    padding-left: 1.4em;
+    line-height: 1.8;
 }
 
 /* ── Table layout improvements ─────────────────────────────────────────────── */

@@ -563,6 +563,8 @@ function blacklist_install_templates(): void
         'blacklist_no_entries'       => 'blacklist_no_entries.tpl',
         'blacklist_run_section'      => 'blacklist_run_section.tpl',
         'blacklist_closed_entry'     => 'blacklist_closed_entry.tpl',
+        'blacklist_index_notice'     => 'blacklist_index_notice.tpl',
+        'blacklist_index_notice_row' => 'blacklist_index_notice_row.tpl',
     ];
 
     foreach ($files as $title => $file) {
@@ -637,8 +639,18 @@ function blacklist_install_stylesheet(): void
 
 function blacklist_load_language(): void
 {
-    global $lang;
+    global $lang, $templatelist;
     $lang->load('blacklist');
+
+    // Pre-cache the index notice templates (global_start runs before the template cache is filled)
+    if (defined('THIS_SCRIPT') && THIS_SCRIPT === 'index.php') {
+        if (isset($templatelist)) {
+            $templatelist .= ',';
+        } else {
+            $templatelist = '';
+        }
+        $templatelist .= 'blacklist_index_notice,blacklist_index_notice_row';
+    }
 }
 
 /**
@@ -824,7 +836,7 @@ function blacklist_remove_index_template_notice(): void
  */
 function blacklist_build_index_notice(): void
 {
-    global $mybb, $db, $lang, $blacklist_index_notice;
+    global $mybb, $db, $lang, $templates, $theme, $blacklist_index_notice;
 
     $blacklist_index_notice = '';
 
@@ -891,39 +903,28 @@ function blacklist_build_index_notice(): void
 
     $blacklist_url = htmlspecialchars_uni($mybb->settings['bburl'] . '/blacklist.php');
 
-    $rows_html = '';
+    $notice_rows = '';
     foreach ($entries as $e) {
-        $char_name = format_name(htmlspecialchars_uni($e['username']), $e['usergroup'], $e['displaygroup']);
-        $deadline  = my_date('d.m.Y', (int) $e['deadline']);
-        $cat       = htmlspecialchars_uni($e['cat_name']);
+        $notice_char     = format_name(htmlspecialchars_uni($e['username']), $e['usergroup'], $e['displaygroup']);
+        $notice_deadline = my_date('d.m.Y', (int) $e['deadline']);
+        $notice_category = htmlspecialchars_uni($e['cat_name']);
 
         switch ($e['cat_response']) {
             case 'button':
-                $action = $lang->blacklist_notice_action_button;
+                $notice_action = $lang->blacklist_notice_action_button;
                 break;
             case 'posting':
-                $action = $lang->blacklist_notice_action_posting;
+                $notice_action = $lang->blacklist_notice_action_posting;
                 break;
             default:
-                $action = $lang->blacklist_notice_action_none;
+                $notice_action = $lang->blacklist_notice_action_none;
                 break;
         }
 
-        $rows_html .= '<li>' . $char_name . ' &mdash; ' . $cat
-            . ' &mdash; ' . $lang->blacklist_notice_until . ': <strong>' . $deadline . '</strong>'
-            . ' &mdash; ' . $action . '</li>';
+        eval('$notice_rows .= "' . $templates->get('blacklist_index_notice_row') . '";');
     }
 
-    $blacklist_index_notice =
-        '<table border="0" cellspacing="1" cellpadding="0" class="tborder" style="margin-bottom:10px;width:100%">'
-        . '<tr><td class="tcat" style="padding:7px 12px">'
-        . '<strong>' . $lang->blacklist_notice_title . '</strong>'
-        . ' &nbsp;<a href="' . $blacklist_url . '" class="smalltext">' . $lang->blacklist_notice_link . ' &rarr;</a>'
-        . '</td></tr>'
-        . '<tr><td class="trow2" style="padding:8px 12px">'
-        . '<ul style="margin:0;padding-left:1.4em;line-height:1.8">' . $rows_html . '</ul>'
-        . '</td></tr>'
-        . '</table>';
+    eval('$blacklist_index_notice = "' . $templates->get('blacklist_index_notice') . '";');
 }
 
 // ---------------------------------------------------------------------------

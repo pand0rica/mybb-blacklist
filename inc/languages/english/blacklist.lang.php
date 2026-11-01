@@ -26,7 +26,7 @@ $l['blacklist_lbl_thread']   = 'Thread ID (0 = none):';
 
 // Status messages
 $l['blacklist_resolved_success'] = 'Your blacklist entry has been resolved.';
-$l['blacklist_resolved_failed']  = 'The condition for removal has not been met yet. Please post in the relevant scene first.';
+$l['blacklist_resolved_failed']  = 'The condition for removal has not been met yet. Please post first (for scene entries: in the relevant scene).';
 $l['blacklist_entry_added']      = 'Blacklist entry added.';
 $l['blacklist_entry_deleted']    = 'Blacklist entry deleted.';
 

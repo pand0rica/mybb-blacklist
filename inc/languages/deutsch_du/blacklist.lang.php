@@ -26,7 +26,7 @@ $l['blacklist_lbl_thread']   = 'Thread-ID (0 = keine):';
 
 // Status messages
 $l['blacklist_resolved_success'] = 'Dein Blacklist-Eintrag wurde erledigt.';
-$l['blacklist_resolved_failed']  = 'Die Bedingung für die Selbstentfernung ist noch nicht erfüllt. Bitte poste zuerst in der betreffenden Szene.';
+$l['blacklist_resolved_failed']  = 'Die Bedingung für die Selbstentfernung ist noch nicht erfüllt. Bitte poste zuerst (bei Szenen-Einträgen in der betreffenden Szene).';
 $l['blacklist_entry_added']      = 'Blacklist-Eintrag hinzugefügt.';
 $l['blacklist_entry_deleted']    = 'Blacklist-Eintrag gelöscht.';
 

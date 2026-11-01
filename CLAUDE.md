@@ -27,7 +27,7 @@ Integrates with the Logbook plugin (F:\Code\mybb-plugins\logbooks) to check whet
 ## Response types
 - `none` – team must resolve manually
 - `button` – user clicks "I'm active", condition is re-checked
-- `posting` – user must post in the exact thread AFTER timestamp_added
+- `posting` – user must post in the exact thread AFTER timestamp_added; entries without thread_id (non-scene categories) accept any visible post after timestamp_added
 
 ## Hooks used from Logbook
 - `logbook_scene_finished_changed` – auto-resolve entries when scene is finished

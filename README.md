@@ -90,7 +90,7 @@ Click **Add Category** and fill in:
 |---|---|
 | **None** | Entry can only be removed by the team |
 | **Button** | User clicks "I'm active!"; entry is resolved immediately |
-| **Post in scene** | User must post in the exact scene thread **after** the entry was created |
+| **Post in scene** | User must post in the exact scene thread **after** the entry was created. For entries without a scene (e.g. posting inactivity), any post in the forum after the entry was created counts |
 
 ### Blacklist runs (cycles)
 

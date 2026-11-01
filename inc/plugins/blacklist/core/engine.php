@@ -420,22 +420,23 @@ class Blacklist_Engine
     }
 
     /**
-     * Posting requirement: user must have posted in the scene's thread
-     * after timestamp_added.
+     * Posting requirement: user must have posted after timestamp_added.
+     * Scene entries require the post in the scene's thread; entries without
+     * a thread (non-scene categories like global posting inactivity) accept
+     * any visible post anywhere in the forum.
      */
     private function checkPostingRequirement(array $entry, array $category): bool
     {
         $thread_id = (int) $entry['thread_id'];
+        $uid       = (int) $entry['uid'];
+        $ts        = (int) $entry['timestamp_added'];
 
         if ($thread_id <= 0) {
-            return false;
+            $last_post = $this->getGlobalLastPost($uid);
+            $post_time = ($last_post !== null && $last_post > $ts) ? $last_post : null;
+        } else {
+            $post_time = $this->logbook->getFirstPostAfter($uid, $thread_id, $ts);
         }
-
-        $post_time = $this->logbook->getFirstPostAfter(
-            (int) $entry['uid'],
-            $thread_id,
-            (int) $entry['timestamp_added']
-        );
 
         if ($post_time !== null) {
             $this->resolveEntry((int) $entry['id']);
