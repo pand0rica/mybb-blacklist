@@ -1,0 +1,127 @@
+[size=x-large][b]Blacklist[/b][/size]
+[i]Version 1.6.3[/i] – Die Aktivitätskontrolle für RPG-Foren, die nicht nur auf Logins schaut, sondern auf jede einzelne Szene.
+
+[size=large][b]Worum geht's?[/b][/size]
+
+Klassische Blacklists prüfen, ob sich jemand eingeloggt oder irgendwo gepostet hat. In RPG-Foren hilft das wenig: Ein Charakter kann täglich im Off-Topic schreiben und trotzdem drei Szenen seit Wochen liegen lassen. Blacklist prüft auf Basis des Logbook-Plugins, wer in welcher Szene an der Reihe ist, und erstellt daraus Einträge. Die Liste läuft in Runden: Das Team startet sie, die Betroffenen melden sich zurück, das Team schließt sie ab.
+
+[size=large][b]Highlights[/b][/size]
+
+[list]
+[*] Szenenbasierte Prüfung: markiert wird, wer laut Postreihenfolge dran ist
+[*] Acht Kategorietypen, von Szeneninaktivität bis „eingefroren bis"
+[*] Selbst austragen per Button oder durch einen Beitrag in der Szene
+[*] Automatische Erstellung per Task, Hinweis auf der Startseite, Ankündigung im Forum
+[*] Simulation: vorab sehen, wen es treffen würde
+[/list]
+
+[size=large][b]Was das Plugin alles kann[/b][/size]
+
+[b]Für Mitglieder[/b]
+[list]
+[*][b]Öffentliche Blacklist[/b] – Alle Einträge der laufenden Runde, nach Kategorie gruppiert, bei Szenen-Kategorien mit der betroffenen Szene. Gelöschte Accounts bleiben durchgestrichen sichtbar. [i](blacklist.php)[/i]
+[*][b]„Ich bin aktiv!"[/b] – Je nach Kategorie trägst du dich mit einem Klick aus oder schreibst nach Erstellung des Eintrags einen Beitrag in der Szene – dann erledigt sich der Eintrag automatisch. [i](blacklist.php)[/i]
+[*][b]Hinweis auf der Startseite[/b] – Hast du einen offenen Eintrag, siehst du oben auf dem Index, welcher Charakter betroffen ist, bis wann und was zu tun ist. Mit dem Enhanced Account Switcher sieht der Hauptaccount alle Charaktere gebündelt. [i](Startseite)[/i]
+[/list]
+
+[b]Für Team & Moderation[/b]
+[list]
+[*][b]Runden steuern[/b] – Neue Blacklist starten (Einträge werden sofort erstellt) und abschließen. Danach zeigt die Seite, wer sich zurückgemeldet hat und wessen Accounts gelöscht wurden. [i](blacklist.php)[/i]
+[*][b]Einträge verwalten[/b] – Einträge erledigen, löschen oder von Hand hinzufügen. [i](blacklist.php)[/i]
+[*][b]Aktivitäts-Simulation[/b] – Zeigt pro Kategorie, wer jetzt einen Eintrag bekäme, bei Szenen mit letztem Beitrag und Tagen Inaktivität – ohne etwas zu speichern. Ein Debug-Modus erklärt für jede geprüfte Szene, warum sie gezählt oder übersprungen wurde. [i](blacklist.php?action=activity)[/i]
+[/list]
+
+[b]Für Administratoren[/b]
+[list]
+[*][b]Kategorien[/b] – Name, Typ, Schwelle in Tagen, Art der Rückmeldung, betroffene Gruppen (optional inkl. Zusatzgruppen) und ob eine Abwesenheitsmeldung ausnimmt. Typen: Szene wartet, Registrierung, Login, Beiträge, Gruppenzugehörigkeit, kein Zweitaccount, keine aktuelle Szene, eingefroren. [i](ACP → Werkzeuge → Blacklist → Kategorien)[/i]
+[*][b]Offene Einträge[/b] – Gesamtübersicht zum Verwalten. [i](ACP → Werkzeuge → Blacklist)[/i]
+[*][b]Task-Status[/b] – Zeigt, ob der Task aktiv ist und zu den Einstellungen passt, nächsten und letzten Lauf, die letzten Log-Einträge sowie Buttons zum Synchronisieren und Sofort-Ausführen. [i](ACP → Werkzeuge → Blacklist → Task-Status)[/i]
+[/list]
+
+[b]Läuft automatisch[/b]
+[list]
+[*][b]Geplanter Task[/b] – Erstellt die Blacklist zum eingestellten Tag und zur eingestellten Uhrzeit; Änderungen am Zeitplan wirken sofort.
+[*][b]Ankündigung[/b] – Beim Start einer Runde postet ein festgelegter Account genau einen Beitrag mit Frist und Link in einem Thema deiner Wahl.
+[*][b]Beendete Szenen[/b] – Wird eine Szene im Logbook beendet, erledigen sich offene Einträge dazu von selbst.
+[/list]
+
+[b]Zusammenspiel mit anderen Plugins[/b]
+[list]
+[*][b]Logbook[/b] – Pflicht für die Szenen-Kategorien; liefert Szenen, Teilnehmende und Postreihenfolge.
+[*][b]Enhanced Account Switcher[/b] – Optional für die Kategorie „kein Zweitaccount" und den gebündelten Startseiten-Hinweis.
+[/list]
+
+[size=large][b]So sieht's aus[/b][/size]
+
+[img]https://raw.githubusercontent.com/pand0rica/mybb-blacklist/main/docs/screenshots/blacklist-user.png[/img]
+[i]Die öffentliche Blacklist mit „Ich bin aktiv!"-Button[/i]
+
+[img]https://raw.githubusercontent.com/pand0rica/mybb-blacklist/main/docs/screenshots/blacklist-admin.png[/img]
+[i]Teamansicht mit Verwaltungsfunktionen[/i]
+
+[img]https://raw.githubusercontent.com/pand0rica/mybb-blacklist/main/docs/screenshots/blacklist-index-notice.png[/img]
+[i]Hinweis auf der Startseite[/i]
+
+[img]https://raw.githubusercontent.com/pand0rica/mybb-blacklist/main/docs/screenshots/blacklist-activity.png[/img]
+[i]Aktivitäts-Simulation[/i]
+
+[img]https://raw.githubusercontent.com/pand0rica/mybb-blacklist/main/docs/screenshots/blacklist-done.png[/img]
+[i]Abgeschlossene Runde[/i]
+
+[img]https://raw.githubusercontent.com/pand0rica/mybb-blacklist/main/docs/screenshots/acp-overview.png[/img]
+[i]Kategorien im ACP[/i]
+
+[img]https://raw.githubusercontent.com/pand0rica/mybb-blacklist/main/docs/screenshots/acp-categories.png[/img]
+[i]Kategorie anlegen[/i]
+
+[size=large][b]Einstellungen[/b][/size]
+
+[list]
+[*][b]Frist (Tage)[/b] – So lange haben Betroffene Zeit, sich zurückzumelden. [i](Standard: 14)[/i]
+[*][b]Task: automatische Erstellung[/b] – Schaltet den geplanten Task ein oder aus.
+[*][b]Task: Tag, Stunde, Minute[/b] – Wann der Task läuft; Tag 0 = täglich.
+[*][b]Ankündigung: Themen-ID und Account-ID[/b] – Wo und von wem der Start einer Runde angekündigt wird. [i](Standard: 0 = aus)[/i]
+[*][b]Moderationsgruppen[/b] – Diese Gruppen dürfen die Blacklist neben den Admins verwalten.
+[*][b]Einleitungstext[/b] – Optionaler Text über der Liste.
+[/list]
+
+[size=large][b]Voraussetzungen[/b][/size]
+
+[list]
+[*] MyBB 1.8.x
+[*] PHP 7.4 oder 8.x
+[*] Logbook (für die Szenen-Kategorien, vorher installieren)
+[*] Optional: Enhanced Account Switcher
+[/list]
+
+[size=large][b]Installation[/b][/size]
+
+[list=1]
+[*] Dateien in das MyBB-Stammverzeichnis kopieren (Ordnerstruktur beibehalten)
+[*] ACP → Konfiguration → Plugins → Blacklist → Installieren & aktivieren
+[*] ACP → Werkzeuge → Blacklist → mindestens eine Kategorie anlegen
+[*] ACP → Konfiguration → Einstellungen → Blacklist → Frist, Zeitplan und Ankündigung festlegen
+[/list]
+
+[size=large][b]Update[/b][/size]
+
+[list=1]
+[*] Neue Dateien hochladen und vorhandene überschreiben
+[*] ACP → Konfiguration → Plugins → Blacklist → Deaktivieren und wieder Aktivieren
+[/list]
+Templates, Stylesheet und Datenbank-Migrationen werden eingespielt. Einstellungen, Kategorien und Einträge bleiben erhalten.
+
+[size=large][b]Grenzen & Ausblick[/b][/size]
+
+Szenen mit freier Postreihenfolge werden bei „Szene wartet" nicht geprüft, weil unklar ist, wer dran ist. Eine Szene zählt bei „keine aktuelle Szene" erst mit mindestens zwei aktiven Teilnehmenden. Es kann immer nur eine Runde gleichzeitig laufen.
+
+[size=large][b]Download & Quellcode[/b][/size]
+
+&raquo; [url=https://github.com/pand0rica/mybb-blacklist]GitHub: pand0rica/mybb-blacklist[/url] – Änderungen im [url=https://github.com/pand0rica/mybb-blacklist/blob/main/CHANGELOG.md]Changelog[/url], Lizenz GPL-3.0
+
+[size=large][b]Unterstützung[/b][/size]
+
+<i class="cp cp-tea"></i> Wenn dir das Plugin gefällt, kannst du mir gerne einen Tee spendieren: [url=https://ko-fi.com/pand0rica]ko-fi.com/pand0rica[/url]
+
+[size=small]Fragen, Bugs oder Feature-Wünsche gerne als GitHub Issue melden oder hier im Thread.
+Ich freue mich, wenn ihr mir den Link dalasst, wo das Plugin verwendet wird.[/size]

@@ -23,8 +23,5 @@ Thumbs.db
 *.stackdump
 bug.PNG
 
-# Forum post file (not code, not for repo)
-PLUGIN_POST.html
-
 # Logs
 *.log
