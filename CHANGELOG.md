@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- **ACP CSRF protection via MyBB's native mechanism** (dev kit `debugging.md` #23): the own
+  `blacklist_acp_verify_key()` helper is gone. `admin/index.php` already validates the
+  `my_post_key` of every ACP POST and downgrades invalid requests to GET; all write handlers
+  only act on POST. “Activate/Deactivate” in the category menu now uses the core pattern
+  `AdminCP.deleteConfirmation()` (confirm + POST), like “Delete”; a plain GET request no
+  longer toggles a category. The unused `blacklist_invalid_key` language string was removed.
+
+### Added
+- `PLUGIN_POST.html` (forum presentation post) is now part of the repository.
+
 ## 1.6.3
 
 ### Changed
