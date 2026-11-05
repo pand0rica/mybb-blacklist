@@ -91,7 +91,6 @@ $l['blacklist_not_found']        = 'Kategorie nicht gefunden.';
 $l['blacklist_no_categories']    = 'Noch keine Kategorien angelegt.';
 $l['blacklist_no_entries_acp']   = 'Keine offenen Einträge.';
 $l['blacklist_confirm_delete']   = 'Wirklich löschen?';
-$l['blacklist_invalid_key']      = 'Ungültiger Post-Key. Bitte erneut versuchen.';
 $l['blacklist_task_ran']         = 'Task abgeschlossen. Erstellt: %d Einträge, übersprungen: %d.';
 $l['blacklist_task_synced']      = 'Task-Zeitplan aus den Einstellungen synchronisiert.';
 $l['blacklist_task_error']       = 'Task-Fehler:';

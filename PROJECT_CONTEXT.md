@@ -107,8 +107,10 @@ Keine.
   `blacklist_mod_groups`-Gruppe (Primär- oder Zusatzgruppe).
 - Alle schreibenden Frontend-Aktionen: POST + `verify_post_check()`; Team-Aktionen ohne
   Team-Recht → `error_no_permission()`.
-- ACP: alle schreibenden Aktionen über `blacklist_acp_verify_key()` (prüft den
-  Rückgabewert von `verify_post_check()`, der im ACP nicht abbricht).
+- ACP: schreibende Aktionen laufen ausschließlich unter `request_method === 'post'`; den
+  `my_post_key` prüft `admin/index.php` selbst (Dev-Kit `debugging.md` #23). Popup-Aktionen
+  (Aktivieren/Deaktivieren, Löschen) nutzen das Core-Muster Link mit `my_post_key` +
+  `AdminCP.deleteConfirmation()`, das den Link nach Rückfrage als POST absendet.
 
 ## What NOT to change
 - Logbook-Tabellen nirgends außerhalb von `Blacklist_LogbookAdapter` ansprechen.
