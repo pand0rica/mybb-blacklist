@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- **PHP 8 warning on the blacklist page.** `$usercpnav` is initialised before the page template is evaluated, so the undefined-variable warning is gone.
+
 ### Changed
 - Stylesheet uses plain colour/size values instead of the `--h4w-*` custom properties of one specific forum theme. (Forum-specific theming lives on the separate `h4w` branch.)
 

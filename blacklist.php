@@ -19,6 +19,8 @@ define('IN_MYBB', 1);
 define('THIS_SCRIPT', 'blacklist.php');
 
 require_once './global.php';
+// PHP 8: template variable that is not always set
+$usercpnav = null;
 require_once MYBB_ROOT . 'inc/plugins/blacklist/core/engine.php';
 
 $lang->load('blacklist');
