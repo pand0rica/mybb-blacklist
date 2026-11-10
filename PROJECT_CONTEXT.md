@@ -84,7 +84,7 @@ nur fehlende Settings nach.
 |---|---|---|
 | `global_start` | `blacklist_load_language` | Frontend-Sprachdatei + Template-Cache-Liste |
 | `newreply_do_newreply_end`, `newthread_do_newthread_end` | `blacklist_handle_new_post` | `posting`-Einträge im Thread auflösen |
-| `logbook_scene_finished_changed` | `blacklist_on_scene_finished` | Einträge einer beendeten Szene auflösen |
+| `logbook_scene_finished_changed` | `blacklist_on_scene_finished` | Eigene Szenen-Einträge des Beendenden auflösen; bei ≤1 aktivem Teilnehmer alle Einträge der Szene |
 | `index_start` | `blacklist_build_index_notice` | Hinweisleiste `{$blacklist_index_notice}` im Template `index` |
 | `datahandler_user_delete_start` | `blacklist_handle_user_delete` | Usernamen vor dem Löschen sichern (`deleted_username`) |
 | `admin_tools_menu`, `admin_tools_action_handler` | `blacklist_admin_tools_*` | ACP-Menü |

@@ -4,6 +4,7 @@
 
 ### Fixed
 - **PHP 8 warning on the blacklist page.** `$usercpnav` is initialised before the page template is evaluated, so the undefined-variable warning is gone.
+- **Scene finished hook.** Logbook hook `logbook_scene_finished_changed`: the handler waited for a `finished` flag that Logbook no longer sends (finished is stored per participant now), so it never did anything. Open entries of a scene were only cleaned up by the task or when opening the blacklist page. The handler now resolves the toggling participant's own entries for that scene once they are no longer active, and all entries of the scene once at most one active participant is left.
 
 ### Changed
 - Stylesheet uses plain colour/size values instead of the `--h4w-*` custom properties of one specific forum theme. (Forum-specific theming lives on the separate `h4w` branch.)

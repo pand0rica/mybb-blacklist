@@ -191,7 +191,7 @@ Set a Thread ID and Poster UID in the settings. When a new blacklist run is star
 - **Settings are safe on reactivation.** Deactivating/activating (e.g. after an update) never resets your settings, categories or entries.
 - **Task schedule changes apply immediately.** The task row is synchronised with the settings on every ACP page load; check **ACP → Tools → Blacklist → Task Status** if in doubt.
 - **Deleted accounts stay visible.** If a listed account is deleted, the entry stays with a struck-through name and an "(account deleted)" note.
-- **Finished scenes resolve automatically.** When a scene is marked finished in Logbook, open entries for that scene are resolved.
+- **Finished scenes resolve automatically.** When a participant marks their part of a scene as finished in Logbook, their own open entries for that scene are resolved. Once only one active participant is left, all open entries for that scene are resolved.
 
 ---
 
