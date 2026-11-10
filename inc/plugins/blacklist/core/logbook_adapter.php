@@ -153,6 +153,33 @@ class Blacklist_LogbookAdapter
     }
 
     /**
+     * Returns true if the user is still an active (accepted, unfinished)
+     * participant of the given scene.
+     *
+     * @param  int  $scene_id
+     * @param  int  $uid
+     * @return bool
+     */
+    public function isActiveParticipant(int $scene_id, int $uid): bool
+    {
+        $scene_id = (int) $scene_id;
+        $uid      = (int) $uid;
+
+        $query = $this->db->query("
+            SELECT COUNT(*) AS cnt
+            FROM " . TABLE_PREFIX . "logbook_entry e
+            JOIN " . TABLE_PREFIX . "logbook l ON l.id = e.logbook_id
+            WHERE e.scene_id = {$scene_id}
+              AND l.user_id  = {$uid}
+              AND e.finished = 0
+              AND e.accepted = 1
+        ");
+
+        $row = $this->db->fetch_array($query);
+        return (int) ($row['cnt'] ?? 0) > 0;
+    }
+
+    /**
      * Returns true if the user has at least one "legitimate" active scene.
      *
      * A scene counts as legitimate when it is active (accepted, unfinished,

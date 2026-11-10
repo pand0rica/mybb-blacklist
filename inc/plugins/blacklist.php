@@ -732,24 +732,44 @@ function blacklist_handle_new_post(): void
 
 /**
  * Hook: logbook_scene_finished_changed
- * When a scene is marked finished, auto-resolve any open scene_wait entries for that scene.
+ * Fires whenever a participant toggles their own "finished" status (Logbook
+ * stores it per entry, so the hook carries scene_id + user_id, no finished flag).
+ *
+ * - The toggling user is no longer active in the scene -> resolve their own
+ *   open entries for that scene.
+ * - At most one active participant remains -> nobody is waiting anymore,
+ *   resolve all open entries for that scene.
  */
 function blacklist_on_scene_finished(array &$hook_data): void
 {
     global $db;
 
-    if (empty($hook_data['scene_id']) || empty($hook_data['finished'])) {
+    $scene_id = isset($hook_data['scene_id']) ? (int) $hook_data['scene_id'] : 0;
+    $user_id  = isset($hook_data['user_id']) ? (int) $hook_data['user_id'] : 0;
+
+    if ($scene_id <= 0) {
         return;
     }
 
-    $scene_id = (int) $hook_data['scene_id'];
+    require_once MYBB_ROOT . 'inc/plugins/blacklist/core/engine.php';
+    $logbook = new Blacklist_LogbookAdapter();
 
-    // Resolve all open entries tied to this scene
-    $db->update_query(
-        'blacklist_entries',
-        ['status' => 'resolved'],
-        "scene_id = {$scene_id} AND status = 'open'"
-    );
+    if ($logbook->getActiveParticipantCount($scene_id) <= 1) {
+        $db->update_query(
+            'blacklist_entries',
+            ['status' => 'resolved'],
+            "scene_id = {$scene_id} AND status = 'open'"
+        );
+        return;
+    }
+
+    if ($user_id > 0 && !$logbook->isActiveParticipant($scene_id, $user_id)) {
+        $db->update_query(
+            'blacklist_entries',
+            ['status' => 'resolved'],
+            "scene_id = {$scene_id} AND uid = {$user_id} AND status = 'open'"
+        );
+    }
 }
 
 /**
